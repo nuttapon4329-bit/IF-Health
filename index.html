@@ -485,7 +485,8 @@
                 const dd = String(day).padStart(2, '0');
                 const dateStr = `${year}-${mm}-${dd}`;
 
-                const record = ifHistory.find(h => h.date === dateStr);
+                // ค้นหาเฉพาะ Record ที่มี status เป็น 'success' หรือ 'failed' จริงๆ (ไม่เอาค่าว่าง)
+                const record = ifHistory.find(h => h.date === dateStr && h.status && h.status !== '');
                 
                 let bgClass = "bg-white/5 text-slate-300 border-white/5";
                 let statusDot = "";
