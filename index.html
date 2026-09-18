@@ -314,35 +314,18 @@
                 <input type="hidden" id="input-day-status" value="">
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="text-[10px] text-slate-400 font-medium block mb-1">เวลาเริ่มอด</label>
-                    <input type="time" id="detail-start-time" class="w-full bg-black/40 border border-white/10 rounded-2xl p-3 text-xs text-white focus:outline-none focus:border-iosGreen">
-                </div>
-                <div>
-                    <label class="text-[10px] text-slate-400 font-medium block mb-1">เวลาสิ้นสุด</label>
-                    <input type="time" id="detail-end-time" class="w-full bg-black/40 border border-white/10 rounded-2xl p-3 text-xs text-white focus:outline-none focus:border-iosGreen">
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="text-[10px] text-slate-400 font-medium block mb-1">รูปแบบ</label>
-                    <div class="relative">
-                        <select id="detail-protocol" class="w-full bg-black/40 border border-white/10 rounded-2xl p-3 text-xs text-white focus:outline-none focus:border-iosGreen appearance-none">
-                            <option value="16/8">16/8</option>
-                            <option value="14/10">14/10</option>
-                            <option value="12/12">12/12</option>
-                            <option value="20/4">20/4</option>
-                        </select>
-                        <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-slate-400">
-                            <i class="fa-solid fa-chevron-down text-[10px]"></i>
-                        </div>
+            <div>
+                <label class="text-[10px] text-slate-400 font-medium block mb-1">รูปแบบ</label>
+                <div class="relative">
+                    <select id="detail-protocol" class="w-full bg-black/40 border border-white/10 rounded-2xl p-3 text-xs text-white focus:outline-none focus:border-iosGreen appearance-none">
+                        <option value="16/8">16/8</option>
+                        <option value="14/10">14/10</option>
+                        <option value="12/12">12/12</option>
+                        <option value="20/4">20/4</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-chevron-down text-[10px]"></i>
                     </div>
-                </div>
-                <div>
-                    <label class="text-[10px] text-slate-400 font-medium block mb-1">น้ำหนักเช้านี้ (กก.)</label>
-                    <input type="number" step="0.1" id="detail-weight" placeholder="เช่น 70.5" class="w-full bg-black/40 border border-white/10 rounded-2xl p-3 text-xs text-white focus:outline-none focus:border-iosGreen">
                 </div>
             </div>
 
@@ -538,10 +521,7 @@
             const record = ifHistory.find(h => h.date === dateStr) || {};
             
             setDayStatus(record.status || '');
-            document.getElementById('detail-start-time').value = record.start || '08:00';
-            document.getElementById('detail-end-time').value = record.end || '00:00';
             document.getElementById('detail-protocol').value = record.protocol || '16/8';
-            document.getElementById('detail-weight').value = record.weight || '';
             document.getElementById('detail-note').value = record.note || '';
 
             document.getElementById('day-detail-modal').classList.remove('hidden');
@@ -580,10 +560,7 @@
         async function saveDayDetail() {
             const date = document.getElementById('detail-date-str').value;
             const status = document.getElementById('input-day-status').value;
-            const start = document.getElementById('detail-start-time').value;
-            const end = document.getElementById('detail-end-time').value;
             const protocol = document.getElementById('detail-protocol').value;
-            const weight = document.getElementById('detail-weight').value;
             const note = document.getElementById('detail-note').value;
 
             const record = ifHistory.find(h => h.date === date);
@@ -594,7 +571,7 @@
 
             await fetch(GOOGLE_SCRIPT_URL, {
                 method: "POST",
-                body: JSON.stringify({ action: "saveHistoryDetail", id: rowId, date, status, start, end, protocol, weight, note })
+                body: JSON.stringify({ action: "saveHistoryDetail", id: rowId, date, status, start: "", end: "", protocol, weight: "", note })
             });
 
             await fetchAllData();
