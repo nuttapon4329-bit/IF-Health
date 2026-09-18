@@ -300,12 +300,15 @@
 
             <div>
                 <label class="text-[10px] text-slate-400 font-medium block mb-1.5">ผลการปฏิบัติวันนี้</label>
-                <div class="grid grid-cols-2 gap-2">
+                <div class="grid grid-cols-3 gap-2">
                     <button type="button" onclick="setDayStatus('success')" id="btn-status-success" class="py-2.5 rounded-2xl text-xs font-semibold bg-white/5 border border-white/10 text-slate-300 transition-all">
                         <i class="fa-solid fa-circle-check text-iosGreen mr-1"></i> สำเร็จ
                     </button>
                     <button type="button" onclick="setDayStatus('failed')" id="btn-status-failed" class="py-2.5 rounded-2xl text-xs font-semibold bg-white/5 border border-white/10 text-slate-300 transition-all">
                         <i class="fa-solid fa-circle-xmark text-red-400 mr-1"></i> ไม่สำเร็จ
+                    </button>
+                    <button type="button" onclick="setDayStatus('')" id="btn-status-none" class="py-2.5 rounded-2xl text-xs font-semibold bg-white/5 border border-white/10 text-slate-300 transition-all">
+                        <i class="fa-solid fa-circle text-slate-400 mr-1"></i> ยังไม่บันทึก
                     </button>
                 </div>
                 <input type="hidden" id="input-day-status" value="">
@@ -487,7 +490,7 @@
                 let bgClass = "bg-white/5 text-slate-300 border-white/5";
                 let statusDot = "";
 
-                if (record) {
+                if (record && record.status) {
                     if (record.status === 'success') {
                         bgClass = "bg-iosGreen/15 border-iosGreen/30 text-iosGreen font-bold";
                         statusDot = `<span class="absolute bottom-1 w-1.5 h-1.5 rounded-full bg-iosGreen"></span>`;
@@ -540,21 +543,25 @@
             document.getElementById('input-day-status').value = status;
             const btnSucc = document.getElementById('btn-status-success');
             const btnFail = document.getElementById('btn-status-failed');
+            const btnNone = document.getElementById('btn-status-none');
             const badge = document.getElementById('modal-day-status-badge');
 
             if (status === 'success') {
                 btnSucc.className = "py-2.5 rounded-2xl text-xs font-semibold bg-iosGreen text-black shadow-lg shadow-iosGreen/20 transition-all";
                 btnFail.className = "py-2.5 rounded-2xl text-xs font-semibold bg-white/5 border border-white/10 text-slate-300 transition-all";
+                btnNone.className = "py-2.5 rounded-2xl text-xs font-semibold bg-white/5 border border-white/10 text-slate-300 transition-all";
                 badge.className = "text-[10px] px-2.5 py-0.5 rounded-full bg-iosGreen/20 text-iosGreen font-medium";
                 badge.innerText = "สำเร็จ";
             } else if (status === 'failed') {
                 btnSucc.className = "py-2.5 rounded-2xl text-xs font-semibold bg-white/5 border border-white/10 text-slate-300 transition-all";
                 btnFail.className = "py-2.5 rounded-2xl text-xs font-semibold bg-red-500 text-white shadow-lg shadow-red-500/20 transition-all";
+                btnNone.className = "py-2.5 rounded-2xl text-xs font-semibold bg-white/5 border border-white/10 text-slate-300 transition-all";
                 badge.className = "text-[10px] px-2.5 py-0.5 rounded-full bg-red-500/20 text-red-400 font-medium";
                 badge.innerText = "ไม่สำเร็จ";
             } else {
                 btnSucc.className = "py-2.5 rounded-2xl text-xs font-semibold bg-white/5 border border-white/10 text-slate-300 transition-all";
                 btnFail.className = "py-2.5 rounded-2xl text-xs font-semibold bg-white/5 border border-white/10 text-slate-300 transition-all";
+                btnNone.className = "py-2.5 rounded-2xl text-xs font-semibold bg-white/15 border border-white/30 text-white shadow-lg transition-all";
                 badge.className = "text-[10px] px-2.5 py-0.5 rounded-full bg-white/10 text-slate-300 font-medium";
                 badge.innerText = "ยังไม่มีข้อมูล";
             }
