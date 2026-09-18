@@ -338,9 +338,10 @@
                 <textarea id="detail-note" rows="2" class="w-full bg-black/40 border border-white/10 rounded-2xl p-3 text-xs text-white focus:outline-none focus:border-iosGreen resize-none" placeholder="พิมพ์บันทึกย่อ..."></textarea>
             </div>
 
-            <div class="flex gap-3 pt-2">
-                <button onclick="closeDayModal()" class="w-1/3 py-3 bg-white/5 border border-white/10 text-slate-300 rounded-2xl text-xs font-medium">ยกเลิก</button>
-                <button onclick="saveDayDetail()" class="w-2/3 py-3 bg-iosGreen text-black font-bold rounded-2xl text-xs shadow-lg shadow-iosGreen/20">บันทึกข้อมูล</button>
+            <div class="flex gap-2 pt-2">
+                <button onclick="deleteDayDetail()" class="py-3 px-3 bg-red-500/10 border border-red-500/30 text-red-400 rounded-2xl text-xs font-medium active:scale-95 transition">ลบ</button>
+                <button onclick="closeDayModal()" class="py-3 px-3 bg-white/5 border border-white/10 text-slate-300 rounded-2xl text-xs font-medium active:scale-95 transition">ยกเลิก</button>
+                <button onclick="saveDayDetail()" class="flex-grow py-3 bg-iosGreen text-black font-bold rounded-2xl text-xs shadow-lg shadow-iosGreen/20 active:scale-95 transition">บันทึก</button>
             </div>
         </div>
     </div>
@@ -580,6 +581,32 @@
             });
 
             await fetchAllData();
+        }
+
+        async function deleteDayDetail() {
+            const date = document.getElementById('detail-date-str').value;
+            if (!confirm(`คุณต้องการลบข้อมูลประวัติของวันที่ ${date} ใช่หรือไม่?`)) return;
+
+            const record = ifHistory.find(h => h.date === date);
+            if (!record || !record.rowId) {
+                closeDayModal();
+                return;
+            }
+
+            showLoading(true);
+            closeDayModal();
+
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: "deleteHistoryDetail", id: record.rowId })
+                });
+                await fetchAllData();
+            } catch (err) {
+                console.error(err);
+                alert("ไม่สามารถลบข้อมูลได้");
+                showLoading(false);
+            }
         }
 
         function setCurrentTimeInput() {
