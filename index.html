@@ -1,69 +1,159 @@
-<script>
-  // เปลี่ยน URL นี้ให้เป็น Web App URL ล่าสุดของคุณจากการ Deploy Google Apps Script
-  const WEB_APP_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
-
-  // ฟังก์ชันสำหรับโหลดข้อมูลทั้งหมดเมื่อเปิดเว็บ
-  async function loadCalendarData() {
-    try {
-      let response = await fetch(WEB_APP_URL);
-      let data = await response.json();
-      
-      // ดึงข้อมูลประวัติจาก key 'history' ที่ส่งมาจาก Google Apps Script
-      let historyList = data.history || [];
-      
-      // เคลียร์สถานะเก่าบนหน้าเว็บก่อนเรนเดอร์ใหม่
-      resetCalendarUI();
-      
-      // วนลูปนำข้อมูลแต่ละวันมาแสดงบนปฏิทิน
-      historyList.forEach(item => {
-        // item.date จะมาในรูปแบบ "YYYY-MM-DD" เช่น "2026-09-18"
-        // item.status จะเป็น "success" หรืออื่นๆ
-        updateCalendarDayStatus(item.date, item.status);
-      });
-
-      // อัปเดตสถิติ (Streak / สำเร็จเดือนนี้)
-      calculateStats(historyList);
-
-    } catch (error) {
-      console.error("เกิดข้อผิดพลาดในการโหลดข้อมูล:", error);
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IF-Health Tracker</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #ffffff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
     }
-  }
+    .container {
+      background-color: #1e1e1e;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      width: 360px;
+      text-align: center;
+    }
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    .form-group label {
+      font-size: 14px;
+      color: #b0b0b0;
+      display: block;
+      margin-bottom: 8px;
+    }
+    select {
+      width: 100%;
+      padding: 12px;
+      background-color: #2c2c2c;
+      color: #ffffff;
+      border: 1px solid #3c3c3c;
+      border-radius: 8px;
+      font-size: 16px;
+      outline: none;
+    }
+    /* ปฏิทินอย่างง่าย */
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      font-weight: bold;
+      color: #4ade80;
+    }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+    .day-cell {
+      background-color: #2c2c2c;
+      padding: 10px 0;
+      border-radius: 8px;
+      font-size: 14px;
+      position: relative;
+      cursor: pointer;
+    }
+    .day-cell.success::after {
+      content: '';
+      position: absolute;
+      bottom: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 6px;
+      height: 6px;
+      background-color: #4ade80;
+      border-radius: 50%;
+    }
+    .stats {
+      margin-top: 20px;
+      font-size: 16px;
+      color: #fbbf24;
+    }
+  </style>
+</head>
+<body>
 
-  // ฟังก์ชันตัวอย่างสำหรับจัดการหน้าตาปฏิทิน (ปรับเปลี่ยนชื่อฟังก์ชันให้ตรงกับโค้ดเดิมของคุณได้เลย)
-  function updateCalendarDayStatus(dateStr, status) {
-    // ค้นหา Element ของวันที่นั้นๆ ในปฏิทิน (เช่น อ้างอิงจาก data-date="2026-09-18")
-    let dayElement = document.querySelector(`[data-date="${dateStr}"]`);
-    if (dayElement) {
-      // ลบสถานะเก่าออกก่อน
-      dayElement.classList.remove('success', 'failed');
+  <div class="container">
+    <!-- ส่วนดรอปดาวน์ที่คุณต้องการ -->
+    <div class="form-group">
+      <label>รูปแบบ</label>
+      <select id="protocolSelect">
+        <option value="16/8">16/8</option>
+        <option value="18/6">18/6</option>
+        <option value="20/4">20/4</option>
+      </select>
+    </div>
+
+    <!-- ส่วนปฏิทินจำลอง -->
+    <div class="calendar-header">
+      <span id="monthYearLabel">กันยายน 2569</span>
+    </div>
+    <div class="calendar-grid" id="calendarGrid">
+      <!-- เรนเดอร์วันผ่าน JS -->
+    </div>
+
+    <div class="stats" id="statsDisplay">สำเร็จเดือนนี้: 0 วัน</div>
+  </div>
+
+  <script>
+    // ⚠️ ใส่ URL Web App ของ Google Apps Script ที่คุณDeploy ล่าสุดตรงนี้
+    const WEB_APP_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+
+    async function initApp() {
+      // สร้างตารางปฏิทินเดือนกันยายน 2569 (ตัวอย่าง 1 ถึง 30 วัน)
+      const grid = document.getElementById('calendarGrid');
+      grid.innerHTML = '';
       
-      // เติม class ตามสถานะที่บันทึกไว้ในชีท
-      if (status === 'success') {
-        dayElement.classList.add('success'); // จะแสดงจุดสีเขียวตาม UI ของคุณ
-      } else if (status === 'failed') {
-        dayElement.classList.add('failed'); // จุดสีแดง
+      for (let i = 1; i <= 30; i++) {
+        let dayStr = i < 10 ? '0' + i : i;
+        let fullDate = `2026-09-${dayStr}`; // ล็อคตามเดือนในชีทของคุณ
+        
+        let cell = document.createElement('div');
+        cell.className = 'day-cell';
+        cell.innerText = i;
+        cell.setAttribute('data-date', fullDate);
+        grid.appendChild(cell);
+      }
+
+      // ดึงข้อมูลจาก Google Sheets
+      try {
+        let response = await fetch(WEB_APP_URL);
+        let data = await response.json();
+        
+        let historyList = data.history || [];
+        let successCount = 0;
+
+        historyList.forEach(item => {
+          let cell = document.querySelector(`[data-date="${item.date}"]`);
+          if (cell) {
+            if (item.status === 'success') {
+              cell.classList.add('success');
+              successCount++;
+            }
+          }
+        });
+
+        document.getElementById('statsDisplay').innerText = `สำเร็จเดือนนี้: ${successCount} วัน`;
+
+      } catch (err) {
+        console.error("โหลดข้อมูลไม่สำเร็จ:", err);
       }
     }
-  }
 
-  function resetCalendarUI() {
-    // ล้างค่าสถานะจุดสีบนปฏิทินทั้งหมดก่อนวาดใหม่
-    document.querySelectorAll('.calendar-day').forEach(el => {
-      el.classList.remove('success', 'failed');
-    });
-  }
-
-  function calculateStats(historyList) {
-    // ตัวอย่างการคำนวณจำนวนวันที่สำเร็จในเดือนนี้
-    let successCount = historyList.filter(item => item.status === 'success').length;
-    let successCountEl = document.getElementById('monthly-success-count');
-    if (successCountEl) {
-      successCountEl.innerText = successCount + " วัน";
-    }
-  }
-
-  // เรียกใช้งานเมื่อโหลดหน้าเว็บ
-  window.addEventListener('DOMContentLoaded', () => {
-    loadCalendarData();
-  });
-</script>
+    window.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>
