@@ -350,6 +350,14 @@
         let profileData = {}, weightLogs = [], ifHistory = [];
         let currentCalendarDate = new Date();
 
+        // Helper: ดึงวันที่แบบ Local YYYY-MM-DD (แก้ปัญหา Timezone เพี้ยน)
+        function getLocalDateString(d) {
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
         window.onload = function() {
             setCurrentTimeInput();
             fetchAllData();
@@ -494,7 +502,7 @@
                     }
                 }
 
-                const todayStr = new Date().toISOString().split('T')[0];
+                const todayStr = getLocalDateString(new Date());
                 const isToday = (dateStr === todayStr) ? "ring-2 ring-iosGreen" : "";
 
                 grid.innerHTML += `
@@ -647,7 +655,7 @@
         }
 
         async function autoSaveFinishedFast(start, end, protocol) {
-            const dateStr = start.toISOString().split('T')[0];
+            const dateStr = getLocalDateString(start);
             const startStr = start.toTimeString().slice(0,5);
             const endStr = end.toTimeString().slice(0,5);
 
@@ -712,7 +720,7 @@
         }
 
         function openWeightModal() {
-            document.getElementById('log-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('log-date').value = getLocalDateString(new Date());
             document.getElementById('log-weight-val').value = profileData.weight || 70;
             document.getElementById('weight-modal').classList.remove('hidden');
         }
