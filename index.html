@@ -86,22 +86,11 @@
 
         <!-- TAB 1: TIMER -->
         <section id="tab-timer" class="space-y-5">
-            <!-- Dropdown เลือกรูปแบบ IF -->
-            <div class="glass-panel p-4 rounded-2xl border border-white/10 space-y-2">
-                <label for="protocol-select" class="text-xs text-slate-400 font-medium block flex items-center">
-                    <i class="fa-solid fa-sliders text-iosGreen mr-1.5"></i> เลือกรูปแบบการอดอาหาร (Protocol)
-                </label>
-                <div class="relative">
-                    <select id="protocol-select" onchange="onProtocolChange(this)" class="w-full bg-black/60 border border-white/15 rounded-xl px-3.5 py-3 text-sm text-white font-semibold focus:outline-none focus:border-iosGreen transition appearance-none">
-                        <option value="16">16/8 (ยอดนิยม)</option>
-                        <option value="14">14/10</option>
-                        <option value="12">12/12</option>
-                        <option value="20">20/4 (Warrior)</option>
-                    </select>
-                    <div class="absolute inset-y-0 right-0 flex items-center px-3.5 pointer-events-none text-slate-400">
-                        <i class="fa-solid fa-chevron-down text-xs"></i>
-                    </div>
-                </div>
+            <div class="grid grid-cols-4 gap-2 glass-panel p-1.5 rounded-2xl">
+                <button onclick="setProtocol(16)" id="p-16" class="py-2.5 text-xs font-semibold rounded-xl bg-iosGreen text-black shadow-lg shadow-iosGreen/20 transition-all">16/8</button>
+                <button onclick="setProtocol(14)" id="p-14" class="py-2.5 text-xs font-semibold rounded-xl text-slate-400 hover:text-white transition-all">14/10</button>
+                <button onclick="setProtocol(12)" id="p-12" class="py-2.5 text-xs font-semibold rounded-xl text-slate-400 hover:text-white transition-all">12/12</button>
+                <button onclick="setProtocol(20)" id="p-20" class="py-2.5 text-xs font-semibold rounded-xl text-slate-400 hover:text-white transition-all">20/4</button>
             </div>
 
             <div class="glass-panel rounded-[2.5rem] p-6 text-center flex flex-col items-center relative overflow-hidden shadow-2xl border border-white/10">
@@ -339,7 +328,17 @@
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="text-[10px] text-slate-400 font-medium block mb-1">รูปแบบ</label>
-                    <input type="text" id="detail-protocol" value="16/8" class="w-full bg-black/40 border border-white/10 rounded-2xl p-3 text-xs text-white focus:outline-none focus:border-iosGreen">
+                    <div class="relative">
+                        <select id="detail-protocol" class="w-full bg-black/40 border border-white/10 rounded-2xl p-3 text-xs text-white focus:outline-none focus:border-iosGreen appearance-none">
+                            <option value="16/8">16/8</option>
+                            <option value="14/10">14/10</option>
+                            <option value="12/12">12/12</option>
+                            <option value="20/4">20/4</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                        </div>
+                    </div>
                 </div>
                 <div>
                     <label class="text-[10px] text-slate-400 font-medium block mb-1">น้ำหนักเช้านี้ (กก.)</label>
@@ -710,8 +709,15 @@
             return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
         }
 
-        function onProtocolChange(selectElem) {
-            fastingHours = Number(selectElem.value);
+        function setProtocol(h) {
+            fastingHours = h;
+            document.querySelectorAll('#tab-timer button[id^="p-"]').forEach(b => {
+                b.className = "py-2.5 text-xs font-semibold rounded-xl text-slate-400 hover:text-white transition-all";
+                b.style.boxShadow = "none";
+            });
+            const activeBtn = document.getElementById(`p-${h}`);
+            activeBtn.className = "py-2.5 text-xs font-semibold rounded-xl bg-iosGreen text-black transition-all";
+            activeBtn.style.boxShadow = "0 10px 20px rgba(52, 199, 89, 0.25)";
             updateTargetPreview();
         }
 
