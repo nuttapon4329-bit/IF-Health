@@ -179,9 +179,7 @@
                     <span>อา</span><span>จ</span><span>อ</span><span>พ</span><span>พฤ</span><span>ศ</span><span>ส</span>
                 </div>
 
-                <div id="calendar-grid" class="grid grid-cols-7 gap-1.5">
-                    <!-- Populated via JS -->
-                </div>
+                <div id="calendar-grid" class="grid grid-cols-7 gap-1.5"></div>
 
                 <div class="pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-center gap-3 text-[10px] text-slate-400">
                     <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span>สำเร็จ</span></div>
@@ -229,7 +227,7 @@
         </div>
     </div>
 
-    <!-- Modal Log Calendar Fasting (ปรับเพิ่มปุ่มลบข้อมูล) -->
+    <!-- Modal Log Calendar Fasting -->
     <div id="calendar-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4 hidden">
         <div class="bg-cardBg border border-slate-800 rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm space-y-4">
             <h3 id="cal-modal-title" class="font-bold text-sm text-white">บันทึกการ Fasting</h3>
@@ -246,7 +244,6 @@
                 <label class="text-[10px] text-slate-400">บันทึกเพิ่มเติม</label>
                 <input type="text" id="cal-note" placeholder="เช่น กินชาบูตบท้าย" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white">
             </div>
-            <!-- ปุ่มควบคุม Save / Delete -->
             <div class="flex gap-2 pt-1">
                 <button id="btn-del-cal" onclick="clearCalendarEntry()" class="w-1/3 py-2.5 bg-red-500/20 border border-red-500/40 text-red-400 font-bold rounded-xl text-xs active:scale-95">
                     <i class="fa-solid fa-trash-can mr-1"></i>ลบข้อมูล
@@ -351,11 +348,35 @@
 
         function initOrUpdateChart() {
             const ctx = document.getElementById('weightChart').getContext('2d');
-            weightLogs.sort((a,b) => new Date(a.date) - new Date(b.date));
+            
+            // 1. แปลงวันที่เป็นฟอร์แมต YYYY-MM-DD
+            const formattedLogs = weightLogs.map(l => {
+                let dateStr = l.date;
+                if (dateStr.includes('T')) {
+                    const d = new Date(dateStr);
+                    const year = d.getFullYear();
+                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                    const day = String(d.getDate()).padStart(2, '0');
+                    dateStr = `${year}-${month}-${day}`;
+                }
+                return { date: dateStr, weight: l.weight };
+            });
 
-            const labels = weightLogs.map(l => l.date);
-            const data = weightLogs.map(l => l.weight);
-            const targetData = weightLogs.map(() => profileData.targetWeight || 62);
+            // 2. ลบวันที่ซ้ำออก โดยจะเลือกเอาเฉพาะ "ข้อมูลล่าสุด" ของวันนั้นๆ
+            const uniqueLogsMap = {};
+            formattedLogs.forEach(item => {
+                uniqueLogsMap[item.date] = item.weight; // จะเขียนทับเอาค่าล่าสุดของวันนั้นเสมอ
+            });
+
+            // 3. แปลง Map กลับเป็น Array และจัดเรียงวันที่จากอดีตไปปัจจุบัน
+            const cleanLogs = Object.keys(uniqueLogsMap).map(date => ({
+                date: date,
+                weight: uniqueLogsMap[date]
+            })).sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            const labels = cleanLogs.map(l => l.date);
+            const data = cleanLogs.map(l => l.weight);
+            const targetData = cleanLogs.map(() => profileData.targetWeight || 62);
 
             if (weightChartInstance) weightChartInstance.destroy();
 
@@ -450,7 +471,6 @@
             renderCalendar();
         }
 
-        // ฟังก์ชันสำหรับลบ/เคลียร์ข้อมูลวันนั้นๆ
         function clearCalendarEntry() {
             if (calendarLogs[selectedCalDate]) {
                 delete calendarLogs[selectedCalDate];
@@ -535,10 +555,16 @@
         }
 
         function openWeightModal() {
-            document.getElementById('log-date').value = new Date().toISOString().split('T')[0];
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            
+            document.getElementById('log-date').value = `${year}-${month}-${day}`;
             document.getElementById('log-weight-val').value = profileData.weight || 70;
             document.getElementById('weight-modal').classList.remove('hidden');
         }
+        
         function closeWeightModal() { document.getElementById('weight-modal').classList.add('hidden'); }
         function showLoading(show) { document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none'; }
     </script>
