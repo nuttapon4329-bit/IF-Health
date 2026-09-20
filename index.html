@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>IF & Health Mobile App (Light Pastel)</title>
+    <title>IF & Health Mobile App (Pastel Edition)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -30,6 +31,8 @@
             /* Theme 1: Minty Sage (Default) */
             --bg-main: #f4f8f5;
             --bg-card: #ffffff;
+            --bg-input: #f8fafc;
+            --border-color: #f1f5f9;
             --accent: #10b981;
             --accent-light: #e6f4ea;
             --text-main: #1e293b;
@@ -41,6 +44,8 @@
             /* Theme 2: Sakura Pink */
             --bg-main: #fdf2f8;
             --bg-card: #ffffff;
+            --bg-input: #fdf2f8;
+            --border-color: #fce7f3;
             --accent: #ec4899;
             --accent-light: #fce7f3;
             --text-main: #331829;
@@ -52,6 +57,8 @@
             /* Theme 3: Sweet Lavender */
             --bg-main: #faf5ff;
             --bg-card: #ffffff;
+            --bg-input: #faf5ff;
+            --border-color: #f3e8ff;
             --accent: #a855f7;
             --accent-light: #f3e8ff;
             --text-main: #241434;
@@ -63,6 +70,8 @@
             /* Theme 4: Sky Blue */
             --bg-main: #f0f9ff;
             --bg-card: #ffffff;
+            --bg-input: #f0f9ff;
+            --border-color: #e0f2fe;
             --accent: #0284c7;
             --accent-light: #e0f2fe;
             --text-main: #0c2340;
@@ -74,6 +83,8 @@
             /* Theme 5: Juicy Peach */
             --bg-main: #fff7ed;
             --bg-card: #ffffff;
+            --bg-input: #fff7ed;
+            --border-color: #ffedd5;
             --accent: #f97316;
             --accent-light: #ffedd5;
             --text-main: #361705;
@@ -81,12 +92,35 @@
             --ring-color: #f97316;
         }
 
+        /* Dark Mode Colors (สลับสีพื้นหลังให้เข้มขึ้น แต่คงสี Accent พาสเทลไว้) */
+        html.dark {
+            --bg-main: #0b0f17;
+            --bg-card: #151c28;
+            --bg-input: #1e293b;
+            --border-color: #1e293b;
+            --accent-light: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+        }
+
         body { 
             font-family: 'Kanit', sans-serif; 
             background-color: var(--bg-main); 
             color: var(--text-main);
             -webkit-tap-highlight-color: transparent; 
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .card-element {
+            background-color: var(--bg-card);
+            border-color: var(--border-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .input-element {
+            background-color: var(--bg-input);
+            border-color: var(--border-color);
+            color: var(--text-main);
         }
 
         .progress-ring__circle {
@@ -104,28 +138,34 @@
 <body class="min-h-screen flex flex-col justify-between pb-20 select-none">
 
     <!-- Loading Overlay -->
-    <div id="loading-overlay" class="fixed inset-0 bg-white/80 backdrop-blur-md z-50 flex flex-col items-center justify-center text-emerald-600">
+    <div id="loading-overlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex flex-col items-center justify-center text-emerald-500">
         <i class="fa-solid fa-circle-notch fa-spin text-3xl mb-2" style="color: var(--accent);"></i>
-        <span class="text-xs font-medium text-slate-600">กำลังเชื่อมต่อ Google Sheets...</span>
+        <span class="text-xs font-medium text-slate-300">กำลังเชื่อมต่อ Google Sheets...</span>
     </div>
 
     <!-- Header -->
-    <header class="px-5 py-3.5 bg-white/80 border-b border-slate-100 sticky top-0 backdrop-blur-md z-40 flex items-center justify-between soft-shadow">
+    <header class="px-5 py-3.5 card-element border-b sticky top-0 backdrop-blur-md z-40 flex items-center justify-between soft-shadow">
         <div class="flex items-center space-x-2.5">
             <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background-color: var(--accent-light);">
                 <i class="fa-solid fa-heart-pulse text-base" style="color: var(--accent);"></i>
             </div>
             <div>
                 <h1 class="font-bold text-base tracking-tight leading-none" style="color: var(--text-main);">IF Health Pro</h1>
-                <span class="text-[10px] font-medium" style="color: var(--accent);">Bright Pastel Edition</span>
+                <span class="text-[10px] font-medium" style="color: var(--accent);">Pastel Edition</span>
             </div>
         </div>
         
-        <div class="flex items-center gap-2">
-            <button onclick="openThemeModal()" class="p-2.5 bg-slate-100 hover:bg-slate-200/80 rounded-xl active:scale-95 transition" title="เลือกธีมพาสเทล">
+        <div class="flex items-center gap-1.5">
+            <!-- ปุ่มสลับ Dark Mode -->
+            <button onclick="toggleDarkMode()" class="p-2.5 input-element rounded-xl active:scale-95 transition" title="สลับโหมดมืด/สว่าง">
+                <i id="dark-icon" class="fa-solid fa-moon text-xs text-amber-400"></i>
+            </button>
+            <!-- ปุ่มเลือกธีม -->
+            <button onclick="openThemeModal()" class="p-2.5 input-element rounded-xl active:scale-95 transition" title="เลือกธีมพาสเทล">
                 <i class="fa-solid fa-palette text-xs" style="color: var(--accent);"></i>
             </button>
-            <button onclick="fetchDataFromSheets()" class="p-2.5 bg-slate-100 hover:bg-slate-200/80 rounded-xl text-slate-600 active:scale-95 transition">
+            <!-- ปุ่มรีเฟรช -->
+            <button onclick="fetchDataFromSheets()" class="p-2.5 input-element rounded-xl text-slate-400 active:scale-95 transition">
                 <i class="fa-solid fa-arrows-rotate text-xs"></i>
             </button>
         </div>
@@ -136,25 +176,25 @@
 
         <!-- TAB 1: TIMER -->
         <section id="tab-timer" class="space-y-4">
-            <div class="grid grid-cols-4 gap-1.5 p-1.5 rounded-2xl bg-white soft-shadow border border-slate-100">
+            <div class="grid grid-cols-4 gap-1.5 p-1.5 rounded-2xl card-element soft-shadow border">
                 <button onclick="setProtocol(16)" id="p-16" class="py-2 text-xs font-semibold rounded-xl" style="background-color: var(--accent-light); color: var(--accent);">16/8</button>
-                <button onclick="setProtocol(14)" id="p-14" class="py-2 text-xs font-semibold rounded-xl text-slate-400 hover:text-slate-600">14/10</button>
-                <button onclick="setProtocol(12)" id="p-12" class="py-2 text-xs font-semibold rounded-xl text-slate-400 hover:text-slate-600">12/12</button>
-                <button onclick="setProtocol(20)" id="p-20" class="py-2 text-xs font-semibold rounded-xl text-slate-400 hover:text-slate-600">20/4</button>
+                <button onclick="setProtocol(14)" id="p-14" class="py-2 text-xs font-semibold rounded-xl text-slate-400 hover:text-slate-200">14/10</button>
+                <button onclick="setProtocol(12)" id="p-12" class="py-2 text-xs font-semibold rounded-xl text-slate-400 hover:text-slate-200">12/12</button>
+                <button onclick="setProtocol(20)" id="p-20" class="py-2 text-xs font-semibold rounded-xl text-slate-400 hover:text-slate-200">20/4</button>
             </div>
 
-            <div class="bg-white border border-slate-100 rounded-3xl p-6 text-center flex flex-col items-center relative overflow-hidden soft-shadow">
-                <div class="w-full bg-slate-50 border border-slate-100 p-2.5 rounded-2xl mb-4 flex items-center justify-between text-left">
+            <div class="card-element border rounded-3xl p-6 text-center flex flex-col items-center relative overflow-hidden soft-shadow">
+                <div class="w-full input-element p-2.5 rounded-2xl mb-4 flex items-center justify-between text-left">
                     <div>
                         <div class="text-[10px] text-slate-400 uppercase font-semibold">เวลาเริ่มต้น IF</div>
                         <input type="datetime-local" id="custom-start-time" class="bg-transparent text-xs font-semibold focus:outline-none" style="color: var(--accent);">
                     </div>
-                    <button onclick="setCurrentTimeInput()" class="px-2.5 py-1.5 bg-white border border-slate-200 text-[10px] rounded-lg text-slate-600 font-medium active:scale-95">ปัจจุบัน</button>
+                    <button onclick="setCurrentTimeInput()" class="px-2.5 py-1.5 card-element border text-[10px] rounded-lg text-slate-400 font-medium active:scale-95">ปัจจุบัน</button>
                 </div>
 
                 <div class="relative w-56 h-56 flex items-center justify-center my-1">
                     <svg class="w-full h-full" viewBox="0 0 100 100">
-                        <circle cx="50" cy="50" r="42" fill="none" stroke="#f1f5f9" stroke-width="7"></circle>
+                        <circle cx="50" cy="50" r="42" fill="none" stroke="var(--border-color)" stroke-width="7"></circle>
                         <circle id="progress-circle" cx="50" cy="50" r="42" fill="none" stroke="var(--ring-color)" stroke-width="7" stroke-dasharray="263.89" stroke-dashoffset="263.89" stroke-linecap="round" class="progress-ring__circle"></circle>
                     </svg>
                     <div class="absolute inset-0 flex flex-col items-center justify-center">
@@ -164,13 +204,13 @@
                 </div>
 
                 <div class="grid grid-cols-2 gap-2 w-full mt-4 text-xs">
-                    <div class="bg-slate-50/80 p-2.5 rounded-xl border border-slate-100">
+                    <div class="input-element p-2.5 rounded-xl border">
                         <span class="block text-[9px] text-slate-400">เริ่มเวลา</span>
-                        <span id="start-disp" class="font-bold text-slate-700">--:--</span>
+                        <span id="start-disp" class="font-bold">--:--</span>
                     </div>
-                    <div class="bg-slate-50/80 p-2.5 rounded-xl border border-slate-100">
+                    <div class="input-element p-2.5 rounded-xl border">
                         <span class="block text-[9px] text-slate-400">เป้าหมายจบ</span>
-                        <span id="target-disp" class="font-bold text-slate-700">--:--</span>
+                        <span id="target-disp" class="font-bold">--:--</span>
                     </div>
                 </div>
 
@@ -183,7 +223,7 @@
         <!-- TAB 2: HEALTH & WEIGHT -->
         <section id="tab-health" class="hidden space-y-4">
             <!-- Profile Form & Settings -->
-            <div class="bg-white border border-slate-100 rounded-3xl p-5 soft-shadow space-y-3">
+            <div class="card-element border rounded-3xl p-5 soft-shadow space-y-3">
                 <div class="flex items-center justify-between">
                     <h2 class="text-sm font-bold" style="color: var(--text-main);"><i class="fa-solid fa-user-pen mr-1.5" style="color: var(--accent);"></i> ข้อมูลและเป้าหมาย</h2>
                     <button onclick="saveProfileToSheets()" class="px-3 py-1 font-semibold text-xs rounded-xl active:scale-95" style="background-color: var(--accent-light); color: var(--accent);">บันทึกลง Cloud</button>
@@ -191,30 +231,30 @@
                 <div class="grid grid-cols-2 gap-2 text-xs">
                     <div>
                         <label class="text-slate-400 text-[10px]">เพศ</label>
-                        <select id="user-gender" onchange="calculateHealthMetrics()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-700">
+                        <select id="user-gender" onchange="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2">
                             <option value="male">ชาย</option>
                             <option value="female">หญิง</option>
                         </select>
                     </div>
                     <div>
                         <label class="text-slate-400 text-[10px]">อายุ (ปี)</label>
-                        <input type="number" id="user-age" value="28" oninput="calculateHealthMetrics()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-700">
+                        <input type="number" id="user-age" value="28" oninput="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2">
                     </div>
                     <div>
                         <label class="text-slate-400 text-[10px]">ส่วนสูง (ซม.)</label>
-                        <input type="number" id="user-height" value="170" oninput="calculateHealthMetrics()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-700">
+                        <input type="number" id="user-height" value="170" oninput="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2">
                     </div>
                     <div>
                         <label class="text-slate-400 text-[10px]">น้ำหนักเริ่มต้น (กก.)</label>
-                        <input type="number" step="0.1" id="user-weight" value="70" oninput="calculateHealthMetrics()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-700">
+                        <input type="number" step="0.1" id="user-weight" value="70" oninput="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2">
                     </div>
                     <div>
                         <label class="text-slate-400 text-[10px]">น้ำหนักเป้าหมาย (กก.)</label>
-                        <input type="number" step="0.1" id="user-target" value="62" oninput="calculateHealthMetrics()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-700">
+                        <input type="number" step="0.1" id="user-target" value="62" oninput="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2">
                     </div>
                     <div>
                         <label class="text-slate-400 text-[10px]">เป้าลด/สัปดาห์</label>
-                        <select id="user-loss-rate" onchange="calculateHealthMetrics()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-700 font-medium" style="color: var(--accent);">
+                        <select id="user-loss-rate" onchange="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2 font-medium" style="color: var(--accent);">
                             <option value="0.25">0.25 กก. (ชิวๆ)</option>
                             <option value="0.5" selected>0.5 กก. (แนะนำ)</option>
                             <option value="0.75">0.75 กก. (เข้มข้น)</option>
@@ -226,30 +266,30 @@
 
             <!-- Enhanced Metrics Cards -->
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-                <div class="bg-white border border-slate-100 p-3 rounded-2xl soft-shadow">
+                <div class="card-element border p-3 rounded-2xl soft-shadow">
                     <span class="text-[10px] text-slate-400">BMI</span>
                     <h3 id="bmi-val" class="text-lg font-bold mt-0.5" style="color: var(--accent);">--</h3>
                     <span id="bmi-status" class="text-[9px] text-slate-400">--</span>
                 </div>
-                <div class="bg-white border border-slate-100 p-3 rounded-2xl soft-shadow">
+                <div class="card-element border p-3 rounded-2xl soft-shadow">
                     <span class="text-[10px] text-slate-400">TDEE (ใช้พลังงาน/วัน)</span>
-                    <h3 id="tdee-val" class="text-lg font-bold text-sky-500 mt-0.5">--</h3>
+                    <h3 id="tdee-val" class="text-lg font-bold text-sky-400 mt-0.5">--</h3>
                     <span class="text-[9px] text-slate-400">kcal/วัน</span>
                 </div>
-                <div class="bg-white border border-slate-100 p-3 rounded-2xl soft-shadow">
+                <div class="card-element border p-3 rounded-2xl soft-shadow">
                     <span class="text-[10px] text-slate-400">เป้าหมายทาน/วัน</span>
-                    <h3 id="cal-target-val" class="text-lg font-bold text-amber-500 mt-0.5">--</h3>
+                    <h3 id="cal-target-val" class="text-lg font-bold text-amber-400 mt-0.5">--</h3>
                     <span class="text-[9px] text-slate-400">kcal (เพื่อลดน้ำหนัก)</span>
                 </div>
-                <div class="bg-white border border-slate-100 p-3 rounded-2xl soft-shadow">
+                <div class="card-element border p-3 rounded-2xl soft-shadow">
                     <span class="text-[10px] text-slate-400">ทานขั้นต่ำสุด/วัน</span>
-                    <h3 id="cal-min-val" class="text-lg font-bold text-rose-500 mt-0.5">--</h3>
+                    <h3 id="cal-min-val" class="text-lg font-bold text-rose-400 mt-0.5">--</h3>
                     <span class="text-[9px] text-rose-400">ห้ามต่ำกว่านี้</span>
                 </div>
             </div>
 
             <!-- Weight Progress Chart -->
-            <div class="bg-white border border-slate-100 rounded-3xl p-4 soft-shadow space-y-3">
+            <div class="card-element border rounded-3xl p-4 soft-shadow space-y-3">
                 <div class="flex items-center justify-between">
                     <h3 class="text-xs font-bold" style="color: var(--text-main);">กราฟการลดน้ำหนัก</h3>
                     <button onclick="openWeightModal()" class="px-3 py-1 text-xs font-bold text-white rounded-xl active:scale-95 shadow-sm" style="background-color: var(--accent);">+ ชั่งน้ำหนัก</button>
@@ -262,13 +302,13 @@
 
         <!-- TAB 3: CALENDAR LOG -->
         <section id="tab-calendar" class="hidden space-y-4">
-            <div class="bg-white border border-slate-100 rounded-3xl p-5 soft-shadow space-y-4">
+            <div class="card-element border rounded-3xl p-5 soft-shadow space-y-4">
                 <div class="flex items-center justify-between">
-                    <button onclick="changeMonth(-1)" class="p-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-600 active:scale-95">
+                    <button onclick="changeMonth(-1)" class="p-2 input-element border rounded-xl text-slate-400 active:scale-95">
                         <i class="fa-solid fa-chevron-left text-xs"></i>
                     </button>
                     <h2 id="calendar-month-year" class="font-bold text-sm" style="color: var(--text-main);">Month Year</h2>
-                    <button onclick="changeMonth(1)" class="p-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-600 active:scale-95">
+                    <button onclick="changeMonth(1)" class="p-2 input-element border rounded-xl text-slate-400 active:scale-95">
                         <i class="fa-solid fa-chevron-right text-xs"></i>
                     </button>
                 </div>
@@ -279,7 +319,7 @@
 
                 <div id="calendar-grid" class="grid grid-cols-7 gap-1.5"></div>
 
-                <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-center gap-3 text-[10px] text-slate-500">
+                <div class="pt-3 border-t border-slate-800/20 flex flex-wrap items-center justify-center gap-3 text-[10px] text-slate-400">
                     <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full" style="background-color: var(--accent);"></span><span>สำเร็จ</span></div>
                     <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span><span>ชาบู/Cheat</span></div>
                     <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-sky-400"></span><span>บางส่วน</span></div>
@@ -291,7 +331,7 @@
     </main>
 
     <!-- Bottom Navigation Bar -->
-    <nav class="fixed bottom-0 inset-x-0 bg-white/90 border-t border-slate-100 backdrop-blur-lg z-40 px-4 py-2 flex justify-around pb-safe soft-shadow">
+    <nav class="fixed bottom-0 inset-x-0 card-element border-t backdrop-blur-lg z-40 px-4 py-2 flex justify-around pb-safe soft-shadow">
         <button onclick="switchTab('timer')" id="nav-timer" class="flex flex-col items-center space-y-1" style="color: var(--accent);">
             <i class="fa-solid fa-stopwatch text-lg"></i>
             <span class="text-[10px] font-medium">Timer</span>
@@ -307,64 +347,64 @@
     </nav>
 
     <!-- Modal เลือกธีมสีพาสเทล -->
-    <div id="theme-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4 hidden">
-        <div class="bg-white border border-slate-100 rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm space-y-4 soft-shadow">
+    <div id="theme-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4 hidden">
+        <div class="card-element border rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm space-y-4 soft-shadow">
             <div class="flex items-center justify-between">
-                <h3 class="font-bold text-sm text-slate-800"><i class="fa-solid fa-palette text-amber-400 mr-2"></i>เลือกธีมสีพาสเทล</h3>
-                <button onclick="closeThemeModal()" class="text-slate-400 hover:text-slate-600 p-1"><i class="fa-solid fa-xmark text-base"></i></button>
+                <h3 class="font-bold text-sm" style="color: var(--text-main);"><i class="fa-solid fa-palette text-amber-400 mr-2"></i>เลือกธีมสีพาสเทล</h3>
+                <button onclick="closeThemeModal()" class="text-slate-400 hover:text-slate-200 p-1"><i class="fa-solid fa-xmark text-base"></i></button>
             </div>
             
             <div class="grid grid-cols-1 gap-2.5 text-xs">
-                <button onclick="applyTheme('default')" class="p-3 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between theme-dot">
-                    <span class="font-medium text-slate-700">🌿 Minty Sage (เขียวมินต์พาสเทล)</span>
-                    <span class="w-5 h-5 rounded-full bg-emerald-400 border border-white shadow-sm"></span>
+                <button onclick="applyTheme('default')" class="p-3 input-element border rounded-2xl flex items-center justify-between theme-dot">
+                    <span class="font-medium">🌿 Minty Sage (เขียวมินต์พาสเทล)</span>
+                    <span class="w-5 h-5 rounded-full bg-emerald-400 border border-white/20 shadow-sm"></span>
                 </button>
-                <button onclick="applyTheme('sakura')" class="p-3 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between theme-dot">
-                    <span class="font-medium text-slate-700">🌸 Sakura Pink (ชมพูพาสเทล)</span>
-                    <span class="w-5 h-5 rounded-full bg-pink-400 border border-white shadow-sm"></span>
+                <button onclick="applyTheme('sakura')" class="p-3 input-element border rounded-2xl flex items-center justify-between theme-dot">
+                    <span class="font-medium">🌸 Sakura Pink (ชมพูพาสเทล)</span>
+                    <span class="w-5 h-5 rounded-full bg-pink-400 border border-white/20 shadow-sm"></span>
                 </button>
-                <button onclick="applyTheme('lavender')" class="p-3 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between theme-dot">
-                    <span class="font-medium text-slate-700">🌌 Sweet Lavender (ม่วงพาสเทล)</span>
-                    <span class="w-5 h-5 rounded-full bg-purple-400 border border-white shadow-sm"></span>
+                <button onclick="applyTheme('lavender')" class="p-3 input-element border rounded-2xl flex items-center justify-between theme-dot">
+                    <span class="font-medium">🌌 Sweet Lavender (ม่วงพาสเทล)</span>
+                    <span class="w-5 h-5 rounded-full bg-purple-400 border border-white/20 shadow-sm"></span>
                 </button>
-                <button onclick="applyTheme('sky')" class="p-3 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between theme-dot">
-                    <span class="font-medium text-slate-700">🌊 Sky Blue (ฟ้าสดใส)</span>
-                    <span class="w-5 h-5 rounded-full bg-sky-400 border border-white shadow-sm"></span>
+                <button onclick="applyTheme('sky')" class="p-3 input-element border rounded-2xl flex items-center justify-between theme-dot">
+                    <span class="font-medium">🌊 Sky Blue (ฟ้าสดใส)</span>
+                    <span class="w-5 h-5 rounded-full bg-sky-400 border border-white/20 shadow-sm"></span>
                 </button>
-                <button onclick="applyTheme('peach')" class="p-3 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between theme-dot">
-                    <span class="font-medium text-slate-700">🍑 Juicy Peach (ส้มพีชพาสเทล)</span>
-                    <span class="w-5 h-5 rounded-full bg-orange-400 border border-white shadow-sm"></span>
+                <button onclick="applyTheme('peach')" class="p-3 input-element border rounded-2xl flex items-center justify-between theme-dot">
+                    <span class="font-medium">🍑 Juicy Peach (ส้มพีชพาสเทล)</span>
+                    <span class="w-5 h-5 rounded-full bg-orange-400 border border-white/20 shadow-sm"></span>
                 </button>
             </div>
         </div>
     </div>
 
     <!-- Modal Log Weight -->
-    <div id="weight-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4 hidden">
-        <div class="bg-white border border-slate-100 rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm space-y-4 soft-shadow">
-            <h3 class="font-bold text-sm text-slate-800">บันทึกน้ำหนักวันนี้</h3>
+    <div id="weight-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4 hidden">
+        <div class="card-element border rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm space-y-4 soft-shadow">
+            <h3 class="font-bold text-sm" style="color: var(--text-main);">บันทึกน้ำหนักวันนี้</h3>
             <div>
                 <label class="text-[10px] text-slate-400">วันที่</label>
-                <input type="date" id="log-date" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-700">
+                <input type="date" id="log-date" class="w-full input-element border rounded-xl p-2.5 text-xs">
             </div>
             <div>
                 <label class="text-[10px] text-slate-400">น้ำหนัก (กก.)</label>
-                <input type="number" step="0.1" id="log-weight-val" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-700">
+                <input type="number" step="0.1" id="log-weight-val" class="w-full input-element border rounded-xl p-2.5 text-xs">
             </div>
             <div class="flex gap-2">
-                <button onclick="closeWeightModal()" class="w-1/3 py-2.5 bg-slate-100 text-slate-600 rounded-xl text-xs font-medium">ยกเลิก</button>
+                <button onclick="closeWeightModal()" class="w-1/3 py-2.5 input-element border rounded-xl text-xs font-medium">ยกเลิก</button>
                 <button onclick="saveWeightToSheets()" class="w-2/3 py-2.5 text-white font-bold rounded-xl text-xs shadow-sm" style="background-color: var(--accent);">บันทึกไป Cloud</button>
             </div>
         </div>
     </div>
 
     <!-- Modal Log Calendar Fasting -->
-    <div id="calendar-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4 hidden">
-        <div class="bg-white border border-slate-100 rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm space-y-4 soft-shadow">
-            <h3 id="cal-modal-title" class="font-bold text-sm text-slate-800">บันทึกการ Fasting</h3>
+    <div id="calendar-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4 hidden">
+        <div class="card-element border rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm space-y-4 soft-shadow">
+            <h3 id="cal-modal-title" class="font-bold text-sm" style="color: var(--text-main);">บันทึกการ Fasting</h3>
             <div>
                 <label class="text-[10px] text-slate-400">สถานะ</label>
-                <select id="cal-status" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-700">
+                <select id="cal-status" class="w-full input-element border rounded-xl p-2.5 text-xs">
                     <option value="Success">✅ สำเร็จ (Hit Goal)</option>
                     <option value="Shabu Day">🍲 ชาบู / Cheat Day</option>
                     <option value="Partial">⚠️ สำเร็จบางส่วน</option>
@@ -373,10 +413,10 @@
             </div>
             <div>
                 <label class="text-[10px] text-slate-400">บันทึกเพิ่มเติม</label>
-                <input type="text" id="cal-note" placeholder="เช่น กินชาบูตบท้าย" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-700">
+                <input type="text" id="cal-note" placeholder="เช่น กินชาบูตบท้าย" class="w-full input-element border rounded-xl p-2.5 text-xs">
             </div>
             <div class="flex gap-2 pt-1">
-                <button id="btn-del-cal" onclick="clearCalendarEntry()" class="w-1/3 py-2.5 bg-rose-50 border border-rose-100 text-rose-500 font-bold rounded-xl text-xs active:scale-95">
+                <button id="btn-del-cal" onclick="clearCalendarEntry()" class="w-1/3 py-2.5 bg-rose-500/10 border border-rose-500/20 text-rose-400 font-bold rounded-xl text-xs active:scale-95">
                     <i class="fa-solid fa-trash-can mr-1"></i>ลบข้อมูล
                 </button>
                 <button onclick="saveCalendarEntry()" class="w-2/3 py-2.5 text-white font-bold rounded-xl text-xs active:scale-95 shadow-sm" style="background-color: var(--accent);">บันทึก</button>
@@ -394,6 +434,13 @@
         let currentMonth = new Date().getMonth(), currentYear = new Date().getFullYear(), selectedCalDate = null;
 
         window.onload = function() {
+            // โหลดตั้งค่า Dark Mode
+            const isDark = localStorage.getItem('if_dark_mode') === 'true';
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                document.getElementById('dark-icon').className = 'fa-solid fa-sun text-xs text-amber-300';
+            }
+
             const savedTheme = localStorage.getItem('if_light_pastel_theme') || 'default';
             applyTheme(savedTheme, false);
 
@@ -401,6 +448,23 @@
             fetchDataFromSheets();
             renderCalendar();
         };
+
+        // --- DARK MODE TOGGLE ---
+        function toggleDarkMode() {
+            const htmlEl = document.documentElement;
+            const darkIcon = document.getElementById('dark-icon');
+            
+            if (htmlEl.classList.contains('dark')) {
+                htmlEl.classList.remove('dark');
+                darkIcon.className = 'fa-solid fa-moon text-xs text-amber-400';
+                localStorage.setItem('if_dark_mode', 'false');
+            } else {
+                htmlEl.classList.add('dark');
+                darkIcon.className = 'fa-solid fa-sun text-xs text-amber-300';
+                localStorage.setItem('if_dark_mode', 'true');
+            }
+            if (weightChartInstance) initOrUpdateChart();
+        }
 
         // --- THEME ENGINE ---
         function openThemeModal() { document.getElementById('theme-modal').classList.remove('hidden'); }
@@ -481,7 +545,7 @@
             }
         }
 
-        // --- ADVANCED HEALTH COMPUTATION ENGINE ---
+        // --- HEALTH COMPUTATION ---
         function updateUIProfile() {
             document.getElementById('user-gender').value = profileData.gender || 'male';
             document.getElementById('user-age').value = profileData.age || 28;
@@ -497,7 +561,6 @@
             const weight = Number(document.getElementById('user-weight').value) || 70;
             const lossRate = Number(document.getElementById('user-loss-rate').value) || 0.5;
 
-            // 1. BMI Calculation & Status
             const hM = height / 100;
             const bmi = (weight / (hM * hM)).toFixed(1);
             document.getElementById('bmi-val').innerText = bmi;
@@ -508,24 +571,17 @@
             else if (bmi >= 25) bmiText = "อ้วน";
             document.getElementById('bmi-status').innerText = bmiText;
 
-            // 2. BMR (Mifflin-St Jeor Formula)
             let bmr = (10 * weight) + (6.25 * height) - (5 * age);
             bmr = gender === 'male' ? bmr + 5 : bmr - 161;
 
-            // 3. TDEE
             const tdee = bmr * 1.375;
             document.getElementById('tdee-val').innerText = Math.round(tdee).toLocaleString();
 
-            // 4. Calorie Deficit Target per Day
             const dailyDeficit = (lossRate * 7700) / 7; 
             let targetCal = Math.round(tdee - dailyDeficit);
-
-            // 5. Absolute Safety Minimum Calorie Threshold
             const minSafetyCal = Math.round(bmr);
             
-            if (targetCal < minSafetyCal) {
-                targetCal = minSafetyCal;
-            }
+            if (targetCal < minSafetyCal) targetCal = minSafetyCal;
 
             document.getElementById('cal-target-val').innerText = targetCal.toLocaleString();
             document.getElementById('cal-min-val').innerText = minSafetyCal.toLocaleString();
@@ -559,6 +615,7 @@
             const targetData = cleanLogs.map(() => Number(document.getElementById('user-target').value) || 62);
 
             const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#10b981';
+            const isDark = document.documentElement.classList.contains('dark');
 
             if (weightChartInstance) weightChartInstance.destroy();
 
@@ -576,8 +633,8 @@
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        x: { ticks: { color: '#94a3b8', font: { size: 9 } }, grid: { display: false } },
-                        y: { ticks: { color: '#94a3b8', font: { size: 9 } }, grid: { color: '#f1f5f9' } }
+                        x: { ticks: { color: isDark ? '#64748b' : '#94a3b8', font: { size: 9 } }, grid: { display: false } },
+                        y: { ticks: { color: isDark ? '#64748b' : '#94a3b8', font: { size: 9 } }, grid: { color: isDark ? '#1e293b' : '#f1f5f9' } }
                     }
                 }
             });
@@ -598,6 +655,7 @@
             
             const firstDay = new Date(currentYear, currentMonth, 1).getDay();
             const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
+            const isDark = document.documentElement.classList.contains('dark');
             let html = '';
 
             for (let i = 0; i < firstDay; i++) html += `<div class="aspect-square opacity-10"></div>`;
@@ -605,13 +663,13 @@
             for (let d = 1; d <= totalDays; d++) {
                 const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                 const log = calendarLogs[dateKey];
-                let bg = 'bg-slate-50 border-slate-100 text-slate-600';
+                let bg = isDark ? 'input-element border text-slate-300' : 'bg-slate-50 border-slate-100 text-slate-600';
                 
                 if (log) {
-                    if (log.status === 'Success') bg = 'bg-emerald-100 border-emerald-200 text-emerald-700';
-                    else if (log.status === 'Shabu Day') bg = 'bg-amber-100 border-amber-200 text-amber-700';
-                    else if (log.status === 'Partial') bg = 'bg-sky-100 border-sky-200 text-sky-700';
-                    else if (log.status === 'Missed') bg = 'bg-rose-100 border-rose-200 text-rose-700';
+                    if (log.status === 'Success') bg = isDark ? 'bg-emerald-900/30 border-emerald-500/40 text-emerald-400' : 'bg-emerald-100 border-emerald-200 text-emerald-700';
+                    else if (log.status === 'Shabu Day') bg = isDark ? 'bg-amber-900/30 border-amber-500/40 text-amber-400' : 'bg-amber-100 border-amber-200 text-amber-700';
+                    else if (log.status === 'Partial') bg = isDark ? 'bg-sky-900/30 border-sky-500/40 text-sky-400' : 'bg-sky-100 border-sky-200 text-sky-700';
+                    else if (log.status === 'Missed') bg = isDark ? 'bg-rose-900/30 border-rose-500/40 text-rose-400' : 'bg-rose-100 border-rose-200 text-rose-700';
                 }
 
                 html += `
