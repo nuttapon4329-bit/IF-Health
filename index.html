@@ -162,7 +162,7 @@
             </div>
         </section>
 
-        <!-- TAB 3: CALENDAR LOG (เพิ่มส่วนนี้กลับมา) -->
+        <!-- TAB 3: CALENDAR LOG -->
         <section id="tab-calendar" class="hidden space-y-4">
             <div class="bg-cardBg border border-slate-800 rounded-3xl p-5 shadow-xl space-y-4">
                 <div class="flex items-center justify-between">
@@ -194,7 +194,7 @@
 
     </main>
 
-    <!-- Bottom Navigation Bar (3 Tabs) -->
+    <!-- Bottom Navigation Bar -->
     <nav class="fixed bottom-0 inset-x-0 bg-slate-900/90 border-t border-slate-800 backdrop-blur-lg z-40 px-4 py-2 flex justify-around pb-safe">
         <button onclick="switchTab('timer')" id="nav-timer" class="flex flex-col items-center text-emerald-400 space-y-1">
             <i class="fa-solid fa-stopwatch text-lg"></i>
@@ -229,7 +229,7 @@
         </div>
     </div>
 
-    <!-- Modal Log Calendar Fasting -->
+    <!-- Modal Log Calendar Fasting (ปรับเพิ่มปุ่มลบข้อมูล) -->
     <div id="calendar-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4 hidden">
         <div class="bg-cardBg border border-slate-800 rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm space-y-4">
             <h3 id="cal-modal-title" class="font-bold text-sm text-white">บันทึกการ Fasting</h3>
@@ -246,9 +246,12 @@
                 <label class="text-[10px] text-slate-400">บันทึกเพิ่มเติม</label>
                 <input type="text" id="cal-note" placeholder="เช่น กินชาบูตบท้าย" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white">
             </div>
-            <div class="flex gap-2">
-                <button onclick="closeCalendarModal()" class="w-1/3 py-2.5 bg-slate-800 text-slate-300 rounded-xl text-xs">ยกเลิก</button>
-                <button onclick="saveCalendarEntry()" class="w-2/3 py-2.5 bg-emerald-500 text-slate-950 font-bold rounded-xl text-xs">บันทึก</button>
+            <!-- ปุ่มควบคุม Save / Delete -->
+            <div class="flex gap-2 pt-1">
+                <button id="btn-del-cal" onclick="clearCalendarEntry()" class="w-1/3 py-2.5 bg-red-500/20 border border-red-500/40 text-red-400 font-bold rounded-xl text-xs active:scale-95">
+                    <i class="fa-solid fa-trash-can mr-1"></i>ลบข้อมูล
+                </button>
+                <button onclick="saveCalendarEntry()" class="w-2/3 py-2.5 bg-emerald-500 text-slate-950 font-bold rounded-xl text-xs active:scale-95">บันทึก</button>
             </div>
         </div>
     </div>
@@ -420,9 +423,18 @@
         function openCalendarModal(dateStr) {
             selectedCalDate = dateStr;
             document.getElementById('cal-modal-title').innerText = `บันทึกสำหรับ ${dateStr}`;
-            const log = calendarLogs[dateStr] || {};
-            document.getElementById('cal-status').value = log.status || 'Success';
-            document.getElementById('cal-note').value = log.note || '';
+            const log = calendarLogs[dateStr];
+            
+            if (log) {
+                document.getElementById('cal-status').value = log.status || 'Success';
+                document.getElementById('cal-note').value = log.note || '';
+                document.getElementById('btn-del-cal').style.display = 'block';
+            } else {
+                document.getElementById('cal-status').value = 'Success';
+                document.getElementById('cal-note').value = '';
+                document.getElementById('btn-del-cal').style.display = 'none';
+            }
+            
             document.getElementById('calendar-modal').classList.remove('hidden');
         }
 
@@ -434,6 +446,16 @@
                 note: document.getElementById('cal-note').value
             };
             localStorage.setItem('if_mobile_calendar_logs', JSON.stringify(calendarLogs));
+            closeCalendarModal();
+            renderCalendar();
+        }
+
+        // ฟังก์ชันสำหรับลบ/เคลียร์ข้อมูลวันนั้นๆ
+        function clearCalendarEntry() {
+            if (calendarLogs[selectedCalDate]) {
+                delete calendarLogs[selectedCalDate];
+                localStorage.setItem('if_mobile_calendar_logs', JSON.stringify(calendarLogs));
+            }
             closeCalendarModal();
             renderCalendar();
         }
