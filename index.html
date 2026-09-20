@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>IF & Health Mobile App</title>
+    <title>IF & Health Mobile App (Pastel Edition)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -12,9 +12,12 @@
             theme: {
                 extend: {
                     colors: {
-                        darkBg: '#090d16',
-                        cardBg: '#151c2c',
-                        accentGreen: '#10b981',
+                        darkBg: 'var(--bg-main)',
+                        cardBg: 'var(--bg-card)',
+                        accentColor: 'var(--accent)',
+                        accentLight: 'var(--accent-light)',
+                        textMain: 'var(--text-main)',
+                        textSub: 'var(--text-sub)'
                     }
                 }
             }
@@ -24,6 +27,62 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* CSS Variables สำหรับจัดการ 5 ธีมพาสเทล */
+        :root {
+            /* Theme 1: Sage Green (Default) */
+            --bg-main: #0f1715;
+            --bg-card: #182622;
+            --accent: #a3e635;
+            --accent-light: rgba(163, 230, 53, 0.2);
+            --text-main: #f0fdf4;
+            --text-sub: #86efac;
+            --ring-color: #a3e635;
+        }
+
+        [data-theme="cherry"] {
+            /* Theme 2: Cherry Blossom (ชมพูพาสเทล) */
+            --bg-main: #1a0f14;
+            --bg-card: #281620;
+            --accent: #f472b6;
+            --accent-light: rgba(244, 114, 182, 0.2);
+            --text-main: #fdf2f8;
+            --text-sub: #fbcfe8;
+            --ring-color: #f472b6;
+        }
+
+        [data-theme="lavender"] {
+            /* Theme 3: Lavender Dream (ม่วงพาสเทล) */
+            --bg-main: #120f1a;
+            --bg-card: #1f1a2d;
+            --accent: #c084fc;
+            --accent-light: rgba(192, 132, 252, 0.2);
+            --text-main: #faf5ff;
+            --text-sub: #e9d5ff;
+            --ring-color: #c084fc;
+        }
+
+        [data-theme="ocean"] {
+            /* Theme 4: Ocean Breeze (ฟ้าพาสเทล) */
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --accent: #38bdf8;
+            --accent-light: rgba(56, 189, 248, 0.2);
+            --text-main: #f0f9ff;
+            --text-sub: #bae6fd;
+            --ring-color: #38bdf8;
+        }
+
+        [data-theme="peach"] {
+            /* Theme 5: Sweet Peach (ส้มพีชพาสเทล) */
+            --bg-main: #1a120f;
+            --bg-card: #2d1e19;
+            --accent: #fb923c;
+            --accent-light: rgba(251, 146, 60, 0.2);
+            --text-main: #fff7ed;
+            --text-sub: #fed7aa;
+            --ring-color: #fb923c;
+        }
+
         body { font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
         .progress-ring__circle {
             transition: stroke-dashoffset 0.3s ease-in-out;
@@ -31,9 +90,11 @@
             transform-origin: 50% 50%;
         }
         .pb-safe { padding-bottom: env(safe-area-inset-bottom, 5rem); }
+        .theme-dot { transition: transform 0.2s; }
+        .theme-dot:active { transform: scale(0.85); }
     </style>
 </head>
-<body class="bg-darkBg text-slate-100 min-h-screen flex flex-col justify-between pb-20 select-none">
+<body class="bg-darkBg text-slate-100 min-h-screen flex flex-col justify-between pb-20 select-none transition-colors duration-300">
 
     <!-- Loading Overlay -->
     <div id="loading-overlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center text-emerald-400">
@@ -42,19 +103,27 @@
     </div>
 
     <!-- Header -->
-    <header class="px-5 py-4 bg-slate-900/60 border-b border-slate-800/80 sticky top-0 backdrop-blur-md z-40 flex items-center justify-between">
+    <header class="px-5 py-3.5 bg-slate-900/60 border-b border-slate-800/80 sticky top-0 backdrop-blur-md z-40 flex items-center justify-between">
         <div class="flex items-center space-x-2.5">
             <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
-                <i class="fa-solid fa-heart-pulse text-base"></i>
+                <i class="fa-solid fa-heart-pulse text-base" style="color: var(--accent);"></i>
             </div>
             <div>
                 <h1 class="font-bold text-base tracking-tight leading-none text-white">IF Health Pro</h1>
-                <span class="text-[10px] text-emerald-400 font-medium">Cloud Database Connected</span>
+                <span class="text-[10px] font-medium" style="color: var(--text-sub);">Pastel Edition</span>
             </div>
         </div>
-        <button onclick="fetchDataFromSheets()" class="p-2 bg-slate-800 border border-slate-700 rounded-xl text-slate-300 active:scale-95 transition">
-            <i class="fa-solid fa-arrows-rotate text-xs"></i>
-        </button>
+        
+        <div class="flex items-center gap-2">
+            <!-- ปุ่มเปลี่ยนธีม -->
+            <button onclick="openThemeModal()" class="p-2 bg-slate-800 border border-slate-700 rounded-xl text-slate-300 active:scale-95 transition" title="เปลี่ยนธีมสี">
+                <i class="fa-solid fa-palette text-xs" style="color: var(--accent);"></i>
+            </button>
+            <!-- ปุ่มรีเฟรช -->
+            <button onclick="fetchDataFromSheets()" class="p-2 bg-slate-800 border border-slate-700 rounded-xl text-slate-300 active:scale-95 transition">
+                <i class="fa-solid fa-arrows-rotate text-xs"></i>
+            </button>
+        </div>
     </header>
 
     <!-- Main Content Container -->
@@ -63,7 +132,7 @@
         <!-- TAB 1: TIMER -->
         <section id="tab-timer" class="space-y-4">
             <div class="grid grid-cols-4 gap-1.5 bg-cardBg p-1.5 rounded-2xl border border-slate-800">
-                <button onclick="setProtocol(16)" id="p-16" class="py-2 text-xs font-semibold rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">16/8</button>
+                <button onclick="setProtocol(16)" id="p-16" class="py-2 text-xs font-semibold rounded-xl border" style="background-color: var(--accent-light); color: var(--accent); border-color: var(--accent);">16/8</button>
                 <button onclick="setProtocol(14)" id="p-14" class="py-2 text-xs font-semibold rounded-xl text-slate-400 hover:text-white">14/10</button>
                 <button onclick="setProtocol(12)" id="p-12" class="py-2 text-xs font-semibold rounded-xl text-slate-400 hover:text-white">12/12</button>
                 <button onclick="setProtocol(20)" id="p-20" class="py-2 text-xs font-semibold rounded-xl text-slate-400 hover:text-white">20/4</button>
@@ -73,7 +142,7 @@
                 <div class="w-full bg-slate-900/90 border border-slate-800 p-2.5 rounded-2xl mb-4 flex items-center justify-between text-left">
                     <div>
                         <div class="text-[10px] text-slate-400 uppercase font-semibold">เวลาเริ่มต้น IF</div>
-                        <input type="datetime-local" id="custom-start-time" class="bg-transparent text-xs text-emerald-400 font-semibold focus:outline-none">
+                        <input type="datetime-local" id="custom-start-time" class="bg-transparent text-xs font-semibold focus:outline-none" style="color: var(--accent);">
                     </div>
                     <button onclick="setCurrentTimeInput()" class="px-2.5 py-1.5 bg-slate-800 border border-slate-700 text-[10px] rounded-lg text-slate-300">ปัจจุบัน</button>
                 </div>
@@ -81,7 +150,7 @@
                 <div class="relative w-56 h-56 flex items-center justify-center my-1">
                     <svg class="w-full h-full" viewBox="0 0 100 100">
                         <circle cx="50" cy="50" r="42" fill="none" stroke="#1e293b" stroke-width="7"></circle>
-                        <circle id="progress-circle" cx="50" cy="50" r="42" fill="none" stroke="#10b981" stroke-width="7" stroke-dasharray="263.89" stroke-dashoffset="263.89" stroke-linecap="round" class="progress-ring__circle"></circle>
+                        <circle id="progress-circle" cx="50" cy="50" r="42" fill="none" stroke="var(--ring-color)" stroke-width="7" stroke-dasharray="263.89" stroke-dashoffset="263.89" stroke-linecap="round" class="progress-ring__circle"></circle>
                     </svg>
                     <div class="absolute inset-0 flex flex-col items-center justify-center">
                         <span id="timer-display" class="text-3xl font-extrabold text-white tracking-tight">00:00:00</span>
@@ -100,7 +169,7 @@
                     </div>
                 </div>
 
-                <button id="btn-toggle-fast" onclick="toggleFast()" class="w-full mt-5 py-3.5 bg-emerald-500 text-slate-950 font-bold rounded-2xl text-sm shadow-lg shadow-emerald-500/20 active:scale-95 transition">
+                <button id="btn-toggle-fast" onclick="toggleFast()" class="w-full mt-5 py-3.5 font-bold rounded-2xl text-sm shadow-lg active:scale-95 transition" style="background-color: var(--accent); color: #090d16;">
                     เริ่มอดอาหาร (Start Fasting)
                 </button>
             </div>
@@ -110,8 +179,8 @@
         <section id="tab-health" class="hidden space-y-4">
             <div class="bg-cardBg border border-slate-800 rounded-3xl p-5 shadow-xl space-y-3">
                 <div class="flex items-center justify-between">
-                    <h2 class="text-sm font-bold text-white"><i class="fa-solid fa-user-pen text-emerald-400 mr-1.5"></i> ข้อมูลร่างกาย</h2>
-                    <button onclick="saveProfileToSheets()" class="px-3 py-1 bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-semibold text-xs rounded-xl active:scale-95">บันทึกลง Cloud</button>
+                    <h2 class="text-sm font-bold text-white"><i class="fa-solid fa-user-pen mr-1.5" style="color: var(--accent);"></i> ข้อมูลร่างกาย</h2>
+                    <button onclick="saveProfileToSheets()" class="px-3 py-1 border font-semibold text-xs rounded-xl active:scale-95" style="background-color: var(--accent-light); color: var(--accent); border-color: var(--accent);">บันทึกลง Cloud</button>
                 </div>
                 <div class="grid grid-cols-2 gap-2 text-xs">
                     <div>
@@ -143,18 +212,18 @@
             <div class="grid grid-cols-2 gap-2 text-center">
                 <div class="bg-cardBg border border-slate-800 p-3 rounded-2xl">
                     <span class="text-[10px] text-slate-400">BMI</span>
-                    <h3 id="bmi-val" class="text-xl font-bold text-emerald-400 mt-0.5">--</h3>
+                    <h3 id="bmi-val" class="text-xl font-bold mt-0.5" style="color: var(--accent);">--</h3>
                 </div>
                 <div class="bg-cardBg border border-slate-800 p-3 rounded-2xl">
                     <span class="text-[10px] text-slate-400">แคลอรีแนะนำ/วัน</span>
-                    <h3 id="cal-target-val" class="text-xl font-bold text-amber-400 mt-0.5">--</h3>
+                    <h3 id="cal-target-val" class="text-xl font-bold text-amber-300 mt-0.5">--</h3>
                 </div>
             </div>
 
             <div class="bg-cardBg border border-slate-800 rounded-3xl p-4 shadow-xl space-y-3">
                 <div class="flex items-center justify-between">
                     <h3 class="text-xs font-bold text-white">กราฟการลดน้ำหนัก</h3>
-                    <button onclick="openWeightModal()" class="px-3 py-1 bg-emerald-500 text-slate-950 text-xs font-bold rounded-xl active:scale-95">+ ชั่งน้ำหนัก</button>
+                    <button onclick="openWeightModal()" class="px-3 py-1 text-xs font-bold rounded-xl active:scale-95" style="background-color: var(--accent); color: #090d16;">+ ชั่งน้ำหนัก</button>
                 </div>
                 <div class="w-full h-48">
                     <canvas id="weightChart"></canvas>
@@ -182,10 +251,10 @@
                 <div id="calendar-grid" class="grid grid-cols-7 gap-1.5"></div>
 
                 <div class="pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-center gap-3 text-[10px] text-slate-400">
-                    <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span>สำเร็จ</span></div>
-                    <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-orange-500"></span><span>ชาบู/Cheat</span></div>
-                    <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500"></span><span>บางส่วน</span></div>
-                    <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-500"></span><span>ไม่สำเร็จ</span></div>
+                    <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full" style="background-color: var(--accent);"></span><span>สำเร็จ</span></div>
+                    <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-orange-400"></span><span>ชาบู/Cheat</span></div>
+                    <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-sky-400"></span><span>บางส่วน</span></div>
+                    <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-rose-400"></span><span>ไม่สำเร็จ</span></div>
                 </div>
             </div>
         </section>
@@ -194,7 +263,7 @@
 
     <!-- Bottom Navigation Bar -->
     <nav class="fixed bottom-0 inset-x-0 bg-slate-900/90 border-t border-slate-800 backdrop-blur-lg z-40 px-4 py-2 flex justify-around pb-safe">
-        <button onclick="switchTab('timer')" id="nav-timer" class="flex flex-col items-center text-emerald-400 space-y-1">
+        <button onclick="switchTab('timer')" id="nav-timer" class="flex flex-col items-center space-y-1" style="color: var(--accent);">
             <i class="fa-solid fa-stopwatch text-lg"></i>
             <span class="text-[10px] font-medium">Timer</span>
         </button>
@@ -207,6 +276,39 @@
             <span class="text-[10px] font-medium">Calendar</span>
         </button>
     </nav>
+
+    <!-- Modal เลือกธีมพาสเทล -->
+    <div id="theme-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4 hidden">
+        <div class="bg-cardBg border border-slate-800 rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="font-bold text-sm text-white"><i class="fa-solid fa-palette text-amber-300 mr-2"></i>เลือกธีมสีพาสเทล</h3>
+                <button onclick="closeThemeModal()" class="text-slate-400 hover:text-white p-1"><i class="fa-solid fa-xmark text-base"></i></button>
+            </div>
+            
+            <div class="grid grid-cols-1 gap-2.5 text-xs">
+                <button onclick="applyTheme('default')" class="p-3 bg-slate-900 border border-slate-700/80 rounded-2xl flex items-center justify-between theme-dot">
+                    <span class="font-medium text-slate-200">🌿 Sage Green (เขียวมินต์)</span>
+                    <span class="w-5 h-5 rounded-full bg-lime-400 border border-white/20"></span>
+                </button>
+                <button onclick="applyTheme('cherry')" class="p-3 bg-slate-900 border border-slate-700/80 rounded-2xl flex items-center justify-between theme-dot">
+                    <span class="font-medium text-slate-200">🌸 Cherry Blossom (ชมพูซากุระ)</span>
+                    <span class="w-5 h-5 rounded-full bg-pink-400 border border-white/20"></span>
+                </button>
+                <button onclick="applyTheme('lavender')" class="p-3 bg-slate-900 border border-slate-700/80 rounded-2xl flex items-center justify-between theme-dot">
+                    <span class="font-medium text-slate-200">🌌 Lavender Dream (ม่วงลาเวนเดอร์)</span>
+                    <span class="w-5 h-5 rounded-full bg-purple-400 border border-white/20"></span>
+                </button>
+                <button onclick="applyTheme('ocean')" class="p-3 bg-slate-900 border border-slate-700/80 rounded-2xl flex items-center justify-between theme-dot">
+                    <span class="font-medium text-slate-200">🌊 Ocean Breeze (ฟ้าสว่าง)</span>
+                    <span class="w-5 h-5 rounded-full bg-sky-400 border border-white/20"></span>
+                </button>
+                <button onclick="applyTheme('peach')" class="p-3 bg-slate-900 border border-slate-700/80 rounded-2xl flex items-center justify-between theme-dot">
+                    <span class="font-medium text-slate-200">🍑 Sweet Peach (ส้มพีช)</span>
+                    <span class="w-5 h-5 rounded-full bg-orange-400 border border-white/20"></span>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Modal Log Weight -->
     <div id="weight-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4 hidden">
@@ -222,7 +324,7 @@
             </div>
             <div class="flex gap-2">
                 <button onclick="closeWeightModal()" class="w-1/3 py-2.5 bg-slate-800 text-slate-300 rounded-xl text-xs">ยกเลิก</button>
-                <button onclick="saveWeightToSheets()" class="w-2/3 py-2.5 bg-emerald-500 text-slate-950 font-bold rounded-xl text-xs">บันทึกไป Cloud</button>
+                <button onclick="saveWeightToSheets()" class="w-2/3 py-2.5 font-bold rounded-xl text-xs" style="background-color: var(--accent); color: #090d16;">บันทึกไป Cloud</button>
             </div>
         </div>
     </div>
@@ -248,7 +350,7 @@
                 <button id="btn-del-cal" onclick="clearCalendarEntry()" class="w-1/3 py-2.5 bg-red-500/20 border border-red-500/40 text-red-400 font-bold rounded-xl text-xs active:scale-95">
                     <i class="fa-solid fa-trash-can mr-1"></i>ลบข้อมูล
                 </button>
-                <button onclick="saveCalendarEntry()" class="w-2/3 py-2.5 bg-emerald-500 text-slate-950 font-bold rounded-xl text-xs active:scale-95">บันทึก</button>
+                <button onclick="saveCalendarEntry()" class="w-2/3 py-2.5 font-bold rounded-xl text-xs active:scale-95" style="background-color: var(--accent); color: #090d16;">บันทึก</button>
             </div>
         </div>
     </div>
@@ -263,10 +365,33 @@
         let currentMonth = new Date().getMonth(), currentYear = new Date().getFullYear(), selectedCalDate = null;
 
         window.onload = function() {
+            // โหลดธีมสีที่เคยบันทึกไว้
+            const savedTheme = localStorage.getItem('if_pastel_theme') || 'default';
+            applyTheme(savedTheme, false);
+
             setCurrentTimeInput();
             fetchDataFromSheets();
             renderCalendar();
         };
+
+        // --- THEME SELECTOR ENGINE ---
+        function openThemeModal() { document.getElementById('theme-modal').classList.remove('hidden'); }
+        function closeThemeModal() { document.getElementById('theme-modal').classList.add('hidden'); }
+
+        function applyTheme(themeName, showToast = true) {
+            const htmlEl = document.documentElement;
+            if (themeName === 'default') {
+                htmlEl.removeAttribute('data-theme');
+            } else {
+                htmlEl.setAttribute('data-theme', themeName);
+            }
+            localStorage.setItem('if_pastel_theme', themeName);
+            
+            // Re-render กราฟเพื่อให้สีจุดและเส้นอัปเดตตามธีม
+            if (weightChartInstance) initOrUpdateChart();
+            
+            closeThemeModal();
+        }
 
         // --- GOOGLE SHEETS API CALLS ---
         async function fetchDataFromSheets() {
@@ -349,7 +474,7 @@
         function initOrUpdateChart() {
             const ctx = document.getElementById('weightChart').getContext('2d');
             
-            // 1. แปลงวันที่เป็นฟอร์แมต YYYY-MM-DD
+            // 1. แปลงวันที่เป็น YYYY-MM-DD
             const formattedLogs = weightLogs.map(l => {
                 let dateStr = l.date;
                 if (dateStr.includes('T')) {
@@ -362,13 +487,10 @@
                 return { date: dateStr, weight: l.weight };
             });
 
-            // 2. ลบวันที่ซ้ำออก โดยจะเลือกเอาเฉพาะ "ข้อมูลล่าสุด" ของวันนั้นๆ
+            // 2. กรองเฉพาะข้อมูลล่าสุดของวันที่ซ้ำ
             const uniqueLogsMap = {};
-            formattedLogs.forEach(item => {
-                uniqueLogsMap[item.date] = item.weight; // จะเขียนทับเอาค่าล่าสุดของวันนั้นเสมอ
-            });
+            formattedLogs.forEach(item => { uniqueLogsMap[item.date] = item.weight; });
 
-            // 3. แปลง Map กลับเป็น Array และจัดเรียงวันที่จากอดีตไปปัจจุบัน
             const cleanLogs = Object.keys(uniqueLogsMap).map(date => ({
                 date: date,
                 weight: uniqueLogsMap[date]
@@ -378,6 +500,9 @@
             const data = cleanLogs.map(l => l.weight);
             const targetData = cleanLogs.map(() => profileData.targetWeight || 62);
 
+            // ดึงสีตามธีมปัจจุบันเพื่อนำไปวาดเส้นกราฟ
+            const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#a3e635';
+
             if (weightChartInstance) weightChartInstance.destroy();
 
             weightChartInstance = new Chart(ctx, {
@@ -385,7 +510,7 @@
                 data: {
                     labels,
                     datasets: [
-                        { label: 'Weight', data, borderColor: '#10b981', borderWidth: 2, pointRadius: 3, tension: 0.2 },
+                        { label: 'Weight', data, borderColor: accentColor, borderWidth: 2, pointRadius: 3, tension: 0.2 },
                         { label: 'Target', data: targetData, borderColor: '#f59e0b', borderDash: [4,4], borderWidth: 1.5, pointRadius: 0 }
                     ]
                 },
@@ -394,8 +519,8 @@
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        x: { ticks: { color: '#64748b', font: { size: 9 } }, grid: { display: false } },
-                        y: { ticks: { color: '#64748b', font: { size: 9 } }, grid: { color: '#1e293b' } }
+                        x: { ticks: { color: '#94a3b8', font: { size: 9 } }, grid: { display: false } },
+                        y: { ticks: { color: '#94a3b8', font: { size: 9 } }, grid: { color: '#1e293b' } }
                     }
                 }
             });
@@ -428,8 +553,8 @@
                 if (log) {
                     if (log.status === 'Success') bg = 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300';
                     else if (log.status === 'Shabu Day') bg = 'bg-orange-500/20 border-orange-500/40 text-orange-300';
-                    else if (log.status === 'Partial') bg = 'bg-blue-500/20 border-blue-500/40 text-blue-300';
-                    else if (log.status === 'Missed') bg = 'bg-red-500/20 border-red-500/40 text-red-300';
+                    else if (log.status === 'Partial') bg = 'bg-sky-500/20 border-sky-500/40 text-sky-300';
+                    else if (log.status === 'Missed') bg = 'bg-rose-500/20 border-rose-500/40 text-rose-300';
                 }
 
                 html += `
@@ -496,13 +621,15 @@
                 targetEndTime = new Date(startTime.getTime() + fastingHours * 3600000);
                 isRunning = true;
                 btn.innerText = "สิ้นสุด Fasting";
-                btn.className = btn.className.replace('bg-emerald-500', 'bg-red-500');
+                btn.style.backgroundColor = "#ef4444"; // สีแดงตอนสิ้นสุด
+                btn.style.color = "#ffffff";
                 startTimerLoop();
             } else {
                 isRunning = false;
                 clearInterval(timerInterval);
                 btn.innerText = "เริ่มอดอาหาร (Start Fasting)";
-                btn.className = btn.className.replace('bg-red-500', 'bg-emerald-500');
+                btn.style.backgroundColor = "var(--accent)";
+                btn.style.color = "#090d16";
                 document.getElementById('timer-display').innerText = "00:00:00";
                 document.getElementById('progress-circle').style.strokeDashoffset = 263.89;
             }
@@ -537,19 +664,24 @@
         function setProtocol(h) {
             fastingHours = h;
             document.querySelectorAll('#tab-timer button[id^="p-"]').forEach(b => {
-                b.className = "py-2 text-xs font-semibold rounded-xl text-slate-400 hover:text-white";
+                b.style.backgroundColor = "transparent";
+                b.style.color = "#94a3b8";
+                b.style.borderColor = "transparent";
             });
-            document.getElementById(`p-${h}`).className = "py-2 text-xs font-semibold rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+            const activeBtn = document.getElementById(`p-${h}`);
+            activeBtn.style.backgroundColor = "var(--accent-light)";
+            activeBtn.style.color = "var(--accent)";
+            activeBtn.style.borderColor = "var(--accent)";
         }
 
         function switchTab(t) {
             ['timer', 'health', 'calendar'].forEach(tab => {
                 document.getElementById(`tab-${tab}`).classList.add('hidden');
-                document.getElementById(`nav-${tab}`).className = 'flex flex-col items-center text-slate-400 space-y-1';
+                document.getElementById(`nav-${tab}`).style.color = '#94a3b8';
             });
 
             document.getElementById(`tab-${t}`).classList.remove('hidden');
-            document.getElementById(`nav-${t}`).className = 'flex flex-col items-center text-emerald-400 space-y-1';
+            document.getElementById(`nav-${t}`).style.color = 'var(--accent)';
 
             if (t === 'calendar') renderCalendar();
         }
