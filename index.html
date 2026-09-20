@@ -204,8 +204,8 @@
     </div>
 
     <script>
-        // 🛑 กรุณาวาง URL Google Apps Script ของคุณที่นี่
-        const GOOGLE_SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
+        // Google Apps Script URL ของคุณถูกใส่ไว้ตรงนี้เรียบร้อยแล้ว
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzY38zVJlc70UqiMKc1Ao8Nt6KmOcc06vMCIlRFWgKz4uHpnPAjul7s0PAITVg9XO7Zcw/exec";
 
         let fastingHours = 16, isRunning = false, startTime = null, targetEndTime = null, timerInterval = null;
         let weightChartInstance = null;
@@ -229,7 +229,7 @@
                 updateUIProfile();
                 initOrUpdateChart();
             } catch (err) {
-                alert("ไม่สามารถโหลดข้อมูลจาก Google Sheetsได้ กรุณาเช็ค URL ในระบบ");
+                alert("ไม่สามารถโหลดข้อมูลจาก Google Sheets ได้ กรุณาเช็คการตั้งค่าสิทธิ์ Access ใน Web App ของ Apps Script (ต้องตั้งเป็น Anyone)");
             } finally {
                 showLoading(false);
             }
@@ -245,11 +245,16 @@
                 weight: Number(document.getElementById('user-weight').value),
                 targetWeight: Number(document.getElementById('user-target').value)
             };
-            await fetch(GOOGLE_SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
-            profileData = payload;
-            updateUIProfile();
-            showLoading(false);
-            alert("บันทึกข้อมูลเรียบร้อยแล้ว!");
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
+                profileData = payload;
+                updateUIProfile();
+                alert("บันทึกข้อมูลเรียบร้อยแล้ว!");
+            } catch(e) {
+                alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+            } finally {
+                showLoading(false);
+            }
         }
 
         async function saveWeightToSheets() {
@@ -257,13 +262,18 @@
             const date = document.getElementById('log-date').value;
             const weight = Number(document.getElementById('log-weight-val').value);
 
-            await fetch(GOOGLE_SCRIPT_URL, {
-                method: "POST",
-                body: JSON.stringify({ action: "saveWeight", date, weight })
-            });
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: "saveWeight", date, weight })
+                });
 
-            closeWeightModal();
-            await fetchDataFromSheets();
+                closeWeightModal();
+                await fetchDataFromSheets();
+            } catch(e) {
+                alert("เกิดข้อผิดพลาดในการบันทึกน้ำหนัก");
+                showLoading(false);
+            }
         }
 
         // --- UI & HEALTH COMPUTATION ---
