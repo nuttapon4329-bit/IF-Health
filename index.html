@@ -26,7 +26,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* CSS Variables สำหรับ 5 ธีมพาสเทลสว่าง สดใส */
         :root {
             /* Theme 1: Minty Sage (Default) */
             --bg-main: #f4f8f5;
@@ -123,11 +122,9 @@
         </div>
         
         <div class="flex items-center gap-2">
-            <!-- ปุ่มเลือกธีม -->
             <button onclick="openThemeModal()" class="p-2.5 bg-slate-100 hover:bg-slate-200/80 rounded-xl active:scale-95 transition" title="เลือกธีมพาสเทล">
                 <i class="fa-solid fa-palette text-xs" style="color: var(--accent);"></i>
             </button>
-            <!-- ปุ่มรีเฟรช -->
             <button onclick="fetchDataFromSheets()" class="p-2.5 bg-slate-100 hover:bg-slate-200/80 rounded-xl text-slate-600 active:scale-95 transition">
                 <i class="fa-solid fa-arrows-rotate text-xs"></i>
             </button>
@@ -185,49 +182,73 @@
 
         <!-- TAB 2: HEALTH & WEIGHT -->
         <section id="tab-health" class="hidden space-y-4">
+            <!-- Profile Form & Settings -->
             <div class="bg-white border border-slate-100 rounded-3xl p-5 soft-shadow space-y-3">
                 <div class="flex items-center justify-between">
-                    <h2 class="text-sm font-bold" style="color: var(--text-main);"><i class="fa-solid fa-user-pen mr-1.5" style="color: var(--accent);"></i> ข้อมูลร่างกาย</h2>
+                    <h2 class="text-sm font-bold" style="color: var(--text-main);"><i class="fa-solid fa-user-pen mr-1.5" style="color: var(--accent);"></i> ข้อมูลและเป้าหมาย</h2>
                     <button onclick="saveProfileToSheets()" class="px-3 py-1 font-semibold text-xs rounded-xl active:scale-95" style="background-color: var(--accent-light); color: var(--accent);">บันทึกลง Cloud</button>
                 </div>
                 <div class="grid grid-cols-2 gap-2 text-xs">
                     <div>
                         <label class="text-slate-400 text-[10px]">เพศ</label>
-                        <select id="user-gender" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-700">
+                        <select id="user-gender" onchange="calculateHealthMetrics()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-700">
                             <option value="male">ชาย</option>
                             <option value="female">หญิง</option>
                         </select>
                     </div>
                     <div>
                         <label class="text-slate-400 text-[10px]">อายุ (ปี)</label>
-                        <input type="number" id="user-age" value="28" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-700">
+                        <input type="number" id="user-age" value="28" oninput="calculateHealthMetrics()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-700">
                     </div>
                     <div>
                         <label class="text-slate-400 text-[10px]">ส่วนสูง (ซม.)</label>
-                        <input type="number" id="user-height" value="170" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-700">
+                        <input type="number" id="user-height" value="170" oninput="calculateHealthMetrics()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-700">
                     </div>
                     <div>
-                        <label class="text-slate-400 text-[10px]">น้ำหนักปัจจุบัน (กก.)</label>
-                        <input type="number" step="0.1" id="user-weight" value="70" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-700">
+                        <label class="text-slate-400 text-[10px]">น้ำหนักเริ่มต้น (กก.)</label>
+                        <input type="number" step="0.1" id="user-weight" value="70" oninput="calculateHealthMetrics()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-700">
                     </div>
-                    <div class="col-span-2">
+                    <div>
                         <label class="text-slate-400 text-[10px]">น้ำหนักเป้าหมาย (กก.)</label>
-                        <input type="number" step="0.1" id="user-target" value="62" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-700">
+                        <input type="number" step="0.1" id="user-target" value="62" oninput="calculateHealthMetrics()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-700">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 text-[10px]">เป้าลด/สัปดาห์</label>
+                        <select id="user-loss-rate" onchange="calculateHealthMetrics()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-700 font-medium" style="color: var(--accent);">
+                            <option value="0.25">0.25 กก. (ชิวๆ)</option>
+                            <option value="0.5" selected>0.5 กก. (แนะนำ)</option>
+                            <option value="0.75">0.75 กก. (เข้มข้น)</option>
+                            <option value="1.0">1.0 กก. (เร่งด่วน)</option>
+                        </select>
                     </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-2 text-center">
+            <!-- Enhanced Metrics Cards -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
                 <div class="bg-white border border-slate-100 p-3 rounded-2xl soft-shadow">
                     <span class="text-[10px] text-slate-400">BMI</span>
-                    <h3 id="bmi-val" class="text-xl font-bold mt-0.5" style="color: var(--accent);">--</h3>
+                    <h3 id="bmi-val" class="text-lg font-bold mt-0.5" style="color: var(--accent);">--</h3>
+                    <span id="bmi-status" class="text-[9px] text-slate-400">--</span>
                 </div>
                 <div class="bg-white border border-slate-100 p-3 rounded-2xl soft-shadow">
-                    <span class="text-[10px] text-slate-400">แคลอรีแนะนำ/วัน</span>
-                    <h3 id="cal-target-val" class="text-xl font-bold text-amber-500 mt-0.5">--</h3>
+                    <span class="text-[10px] text-slate-400">TDEE (ใช้พลังงาน/วัน)</span>
+                    <h3 id="tdee-val" class="text-lg font-bold text-sky-500 mt-0.5">--</h3>
+                    <span class="text-[9px] text-slate-400">kcal/วัน</span>
+                </div>
+                <div class="bg-white border border-slate-100 p-3 rounded-2xl soft-shadow">
+                    <span class="text-[10px] text-slate-400">เป้าหมายทาน/วัน</span>
+                    <h3 id="cal-target-val" class="text-lg font-bold text-amber-500 mt-0.5">--</h3>
+                    <span class="text-[9px] text-slate-400">kcal (เพื่อลดน้ำหนัก)</span>
+                </div>
+                <div class="bg-white border border-slate-100 p-3 rounded-2xl soft-shadow">
+                    <span class="text-[10px] text-slate-400">ทานขั้นต่ำสุด/วัน</span>
+                    <h3 id="cal-min-val" class="text-lg font-bold text-rose-500 mt-0.5">--</h3>
+                    <span class="text-[9px] text-rose-400">ห้ามต่ำกว่านี้</span>
                 </div>
             </div>
 
+            <!-- Weight Progress Chart -->
             <div class="bg-white border border-slate-100 rounded-3xl p-4 soft-shadow space-y-3">
                 <div class="flex items-center justify-between">
                     <h3 class="text-xs font-bold" style="color: var(--text-main);">กราฟการลดน้ำหนัก</h3>
@@ -373,7 +394,6 @@
         let currentMonth = new Date().getMonth(), currentYear = new Date().getFullYear(), selectedCalDate = null;
 
         window.onload = function() {
-            // โหลดธีมพาสเทลสว่างที่บันทึกไว้
             const savedTheme = localStorage.getItem('if_light_pastel_theme') || 'default';
             applyTheme(savedTheme, false);
 
@@ -410,6 +430,7 @@
                 weightLogs = await resLogs.json();
 
                 updateUIProfile();
+                calculateHealthMetrics();
                 initOrUpdateChart();
             } catch (err) {
                 alert("ไม่สามารถโหลดข้อมูลจาก Google Sheets ได้ กรุณาตรวจสอบสิทธิ์ Access ใน Apps Script");
@@ -432,6 +453,7 @@
                 await fetch(GOOGLE_SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
                 profileData = payload;
                 updateUIProfile();
+                calculateHealthMetrics();
                 alert("บันทึกข้อมูลเรียบร้อยแล้ว!");
             } catch(e) {
                 alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
@@ -459,22 +481,54 @@
             }
         }
 
-        // --- UI & HEALTH COMPUTATION ---
+        // --- ADVANCED HEALTH COMPUTATION ENGINE ---
         function updateUIProfile() {
             document.getElementById('user-gender').value = profileData.gender || 'male';
             document.getElementById('user-age').value = profileData.age || 28;
             document.getElementById('user-height').value = profileData.height || 170;
             document.getElementById('user-weight').value = profileData.weight || 70;
             document.getElementById('user-target').value = profileData.targetWeight || 62;
+        }
 
-            const hM = (profileData.height || 170) / 100;
-            const bmi = ((profileData.weight || 70) / (hM * hM)).toFixed(1);
+        function calculateHealthMetrics() {
+            const gender = document.getElementById('user-gender').value;
+            const age = Number(document.getElementById('user-age').value) || 28;
+            const height = Number(document.getElementById('user-height').value) || 170;
+            const weight = Number(document.getElementById('user-weight').value) || 70;
+            const lossRate = Number(document.getElementById('user-loss-rate').value) || 0.5;
+
+            // 1. BMI Calculation & Status
+            const hM = height / 100;
+            const bmi = (weight / (hM * hM)).toFixed(1);
             document.getElementById('bmi-val').innerText = bmi;
 
-            let bmr = (10 * profileData.weight) + (6.25 * profileData.height) - (5 * profileData.age);
-            bmr = profileData.gender === 'male' ? bmr + 5 : bmr - 161;
+            let bmiText = "สมส่วน";
+            if (bmi < 18.5) bmiText = "ผอมไป";
+            else if (bmi >= 23 && bmi < 25) bmiText = "ท้วม";
+            else if (bmi >= 25) bmiText = "อ้วน";
+            document.getElementById('bmi-status').innerText = bmiText;
+
+            // 2. BMR (Mifflin-St Jeor Formula)
+            let bmr = (10 * weight) + (6.25 * height) - (5 * age);
+            bmr = gender === 'male' ? bmr + 5 : bmr - 161;
+
+            // 3. TDEE
             const tdee = bmr * 1.375;
-            document.getElementById('cal-target-val').innerText = Math.round(tdee - 500).toLocaleString();
+            document.getElementById('tdee-val').innerText = Math.round(tdee).toLocaleString();
+
+            // 4. Calorie Deficit Target per Day
+            const dailyDeficit = (lossRate * 7700) / 7; 
+            let targetCal = Math.round(tdee - dailyDeficit);
+
+            // 5. Absolute Safety Minimum Calorie Threshold
+            const minSafetyCal = Math.round(bmr);
+            
+            if (targetCal < minSafetyCal) {
+                targetCal = minSafetyCal;
+            }
+
+            document.getElementById('cal-target-val').innerText = targetCal.toLocaleString();
+            document.getElementById('cal-min-val').innerText = minSafetyCal.toLocaleString();
         }
 
         function initOrUpdateChart() {
@@ -492,7 +546,6 @@
                 return { date: dateStr, weight: l.weight };
             });
 
-            // กรองเฉพาะข้อมูลล่าสุดของวันที่ซ้ำ
             const uniqueLogsMap = {};
             formattedLogs.forEach(item => { uniqueLogsMap[item.date] = item.weight; });
 
@@ -503,7 +556,7 @@
 
             const labels = cleanLogs.map(l => l.date);
             const data = cleanLogs.map(l => l.weight);
-            const targetData = cleanLogs.map(() => profileData.targetWeight || 62);
+            const targetData = cleanLogs.map(() => Number(document.getElementById('user-target').value) || 62);
 
             const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#10b981';
 
@@ -625,7 +678,7 @@
                 targetEndTime = new Date(startTime.getTime() + fastingHours * 3600000);
                 isRunning = true;
                 btn.innerText = "สิ้นสุด Fasting";
-                btn.style.backgroundColor = "#ef4444"; // สีแดงปุ่มหยุด
+                btn.style.backgroundColor = "#ef4444";
                 btn.style.color = "#ffffff";
                 startTimerLoop();
             } else {
