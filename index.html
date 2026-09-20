@@ -30,7 +30,6 @@
             transform: rotate(-90deg);
             transform-origin: 50% 50%;
         }
-        /* Mobile Safe Area Padding */
         .pb-safe { padding-bottom: env(safe-area-inset-bottom, 5rem); }
     </style>
 </head>
@@ -63,7 +62,6 @@
 
         <!-- TAB 1: TIMER -->
         <section id="tab-timer" class="space-y-4">
-            <!-- Selector -->
             <div class="grid grid-cols-4 gap-1.5 bg-cardBg p-1.5 rounded-2xl border border-slate-800">
                 <button onclick="setProtocol(16)" id="p-16" class="py-2 text-xs font-semibold rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">16/8</button>
                 <button onclick="setProtocol(14)" id="p-14" class="py-2 text-xs font-semibold rounded-xl text-slate-400 hover:text-white">14/10</button>
@@ -71,9 +69,7 @@
                 <button onclick="setProtocol(20)" id="p-20" class="py-2 text-xs font-semibold rounded-xl text-slate-400 hover:text-white">20/4</button>
             </div>
 
-            <!-- Dashboard Card -->
             <div class="bg-cardBg border border-slate-800 rounded-3xl p-6 text-center flex flex-col items-center relative overflow-hidden shadow-xl">
-                <!-- Custom Time Start Input -->
                 <div class="w-full bg-slate-900/90 border border-slate-800 p-2.5 rounded-2xl mb-4 flex items-center justify-between text-left">
                     <div>
                         <div class="text-[10px] text-slate-400 uppercase font-semibold">เวลาเริ่มต้น IF</div>
@@ -82,7 +78,6 @@
                     <button onclick="setCurrentTimeInput()" class="px-2.5 py-1.5 bg-slate-800 border border-slate-700 text-[10px] rounded-lg text-slate-300">ปัจจุบัน</button>
                 </div>
 
-                <!-- Circular Clock -->
                 <div class="relative w-56 h-56 flex items-center justify-center my-1">
                     <svg class="w-full h-full" viewBox="0 0 100 100">
                         <circle cx="50" cy="50" r="42" fill="none" stroke="#1e293b" stroke-width="7"></circle>
@@ -105,7 +100,6 @@
                     </div>
                 </div>
 
-                <!-- Big Action Button -->
                 <button id="btn-toggle-fast" onclick="toggleFast()" class="w-full mt-5 py-3.5 bg-emerald-500 text-slate-950 font-bold rounded-2xl text-sm shadow-lg shadow-emerald-500/20 active:scale-95 transition">
                     เริ่มอดอาหาร (Start Fasting)
                 </button>
@@ -114,7 +108,6 @@
 
         <!-- TAB 2: HEALTH & WEIGHT -->
         <section id="tab-health" class="hidden space-y-4">
-            <!-- Profile Form -->
             <div class="bg-cardBg border border-slate-800 rounded-3xl p-5 shadow-xl space-y-3">
                 <div class="flex items-center justify-between">
                     <h2 class="text-sm font-bold text-white"><i class="fa-solid fa-user-pen text-emerald-400 mr-1.5"></i> ข้อมูลร่างกาย</h2>
@@ -147,7 +140,6 @@
                 </div>
             </div>
 
-            <!-- Metrics Grid -->
             <div class="grid grid-cols-2 gap-2 text-center">
                 <div class="bg-cardBg border border-slate-800 p-3 rounded-2xl">
                     <span class="text-[10px] text-slate-400">BMI</span>
@@ -159,7 +151,6 @@
                 </div>
             </div>
 
-            <!-- Weight Chart -->
             <div class="bg-cardBg border border-slate-800 rounded-3xl p-4 shadow-xl space-y-3">
                 <div class="flex items-center justify-between">
                     <h3 class="text-xs font-bold text-white">กราฟการลดน้ำหนัก</h3>
@@ -170,17 +161,52 @@
                 </div>
             </div>
         </section>
+
+        <!-- TAB 3: CALENDAR LOG (เพิ่มส่วนนี้กลับมา) -->
+        <section id="tab-calendar" class="hidden space-y-4">
+            <div class="bg-cardBg border border-slate-800 rounded-3xl p-5 shadow-xl space-y-4">
+                <div class="flex items-center justify-between">
+                    <button onclick="changeMonth(-1)" class="p-2 bg-slate-900 border border-slate-800 rounded-xl text-slate-300 active:scale-95">
+                        <i class="fa-solid fa-chevron-left text-xs"></i>
+                    </button>
+                    <h2 id="calendar-month-year" class="font-bold text-sm text-white">Month Year</h2>
+                    <button onclick="changeMonth(1)" class="p-2 bg-slate-900 border border-slate-800 rounded-xl text-slate-300 active:scale-95">
+                        <i class="fa-solid fa-chevron-right text-xs"></i>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-semibold text-slate-500">
+                    <span>อา</span><span>จ</span><span>อ</span><span>พ</span><span>พฤ</span><span>ศ</span><span>ส</span>
+                </div>
+
+                <div id="calendar-grid" class="grid grid-cols-7 gap-1.5">
+                    <!-- Populated via JS -->
+                </div>
+
+                <div class="pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-center gap-3 text-[10px] text-slate-400">
+                    <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span>สำเร็จ</span></div>
+                    <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-orange-500"></span><span>ชาบู/Cheat</span></div>
+                    <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500"></span><span>บางส่วน</span></div>
+                    <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-500"></span><span>ไม่สำเร็จ</span></div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
-    <!-- Bottom Navigation Bar (Mobile Friendly) -->
-    <nav class="fixed bottom-0 inset-x-0 bg-slate-900/90 border-t border-slate-800 backdrop-blur-lg z-40 px-6 py-2 flex justify-around pb-safe">
+    <!-- Bottom Navigation Bar (3 Tabs) -->
+    <nav class="fixed bottom-0 inset-x-0 bg-slate-900/90 border-t border-slate-800 backdrop-blur-lg z-40 px-4 py-2 flex justify-around pb-safe">
         <button onclick="switchTab('timer')" id="nav-timer" class="flex flex-col items-center text-emerald-400 space-y-1">
             <i class="fa-solid fa-stopwatch text-lg"></i>
             <span class="text-[10px] font-medium">Timer</span>
         </button>
         <button onclick="switchTab('health')" id="nav-health" class="flex flex-col items-center text-slate-400 space-y-1">
             <i class="fa-solid fa-chart-line text-lg"></i>
-            <span class="text-[10px] font-medium">Weight & Health</span>
+            <span class="text-[10px] font-medium">Health & Weight</span>
+        </button>
+        <button onclick="switchTab('calendar')" id="nav-calendar" class="flex flex-col items-center text-slate-400 space-y-1">
+            <i class="fa-solid fa-calendar-days text-lg"></i>
+            <span class="text-[10px] font-medium">Calendar</span>
         </button>
     </nav>
 
@@ -203,17 +229,43 @@
         </div>
     </div>
 
+    <!-- Modal Log Calendar Fasting -->
+    <div id="calendar-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4 hidden">
+        <div class="bg-cardBg border border-slate-800 rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm space-y-4">
+            <h3 id="cal-modal-title" class="font-bold text-sm text-white">บันทึกการ Fasting</h3>
+            <div>
+                <label class="text-[10px] text-slate-400">สถานะ</label>
+                <select id="cal-status" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white">
+                    <option value="Success">✅ สำเร็จ (Hit Goal)</option>
+                    <option value="Shabu Day">🍲 ชาบู / Cheat Day</option>
+                    <option value="Partial">⚠️ สำเร็จบางส่วน</option>
+                    <option value="Missed">❌ ไม่สำเร็จ</option>
+                </select>
+            </div>
+            <div>
+                <label class="text-[10px] text-slate-400">บันทึกเพิ่มเติม</label>
+                <input type="text" id="cal-note" placeholder="เช่น กินชาบูตบท้าย" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white">
+            </div>
+            <div class="flex gap-2">
+                <button onclick="closeCalendarModal()" class="w-1/3 py-2.5 bg-slate-800 text-slate-300 rounded-xl text-xs">ยกเลิก</button>
+                <button onclick="saveCalendarEntry()" class="w-2/3 py-2.5 bg-emerald-500 text-slate-950 font-bold rounded-xl text-xs">บันทึก</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Google Apps Script URL ของคุณถูกใส่ไว้ตรงนี้เรียบร้อยแล้ว
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzY38zVJlc70UqiMKc1Ao8Nt6KmOcc06vMCIlRFWgKz4uHpnPAjul7s0PAITVg9XO7Zcw/exec";
 
         let fastingHours = 16, isRunning = false, startTime = null, targetEndTime = null, timerInterval = null;
         let weightChartInstance = null;
         let profileData = {}, weightLogs = [];
+        let calendarLogs = JSON.parse(localStorage.getItem('if_mobile_calendar_logs')) || {};
+        let currentMonth = new Date().getMonth(), currentYear = new Date().getFullYear(), selectedCalDate = null;
 
         window.onload = function() {
             setCurrentTimeInput();
             fetchDataFromSheets();
+            renderCalendar();
         };
 
         // --- GOOGLE SHEETS API CALLS ---
@@ -229,7 +281,7 @@
                 updateUIProfile();
                 initOrUpdateChart();
             } catch (err) {
-                alert("ไม่สามารถโหลดข้อมูลจาก Google Sheets ได้ กรุณาเช็คการตั้งค่าสิทธิ์ Access ใน Web App ของ Apps Script (ต้องตั้งเป็น Anyone)");
+                alert("ไม่สามารถโหลดข้อมูลจาก Google Sheets ได้ กรุณาตรวจสอบสิทธิ์ Access ใน Web App ของ Apps Script");
             } finally {
                 showLoading(false);
             }
@@ -284,7 +336,6 @@
             document.getElementById('user-weight').value = profileData.weight || 70;
             document.getElementById('user-target').value = profileData.targetWeight || 62;
 
-            // Calculations
             const hM = (profileData.height || 170) / 100;
             const bmi = ((profileData.weight || 70) / (hM * hM)).toFixed(1);
             document.getElementById('bmi-val').innerText = bmi;
@@ -324,6 +375,67 @@
                     }
                 }
             });
+        }
+
+        // --- CALENDAR LOG FUNCTIONS ---
+        function changeMonth(dir) {
+            currentMonth += dir;
+            if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+            if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+            renderCalendar();
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            const monthNames = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+            document.getElementById('calendar-month-year').innerText = `${monthNames[currentMonth]} ${currentYear + 543}`;
+            
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
+            let html = '';
+
+            for (let i = 0; i < firstDay; i++) html += `<div class="aspect-square opacity-10"></div>`;
+
+            for (let d = 1; d <= totalDays; d++) {
+                const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const log = calendarLogs[dateKey];
+                let bg = 'bg-slate-900 border-slate-800 text-slate-300';
+                
+                if (log) {
+                    if (log.status === 'Success') bg = 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300';
+                    else if (log.status === 'Shabu Day') bg = 'bg-orange-500/20 border-orange-500/40 text-orange-300';
+                    else if (log.status === 'Partial') bg = 'bg-blue-500/20 border-blue-500/40 text-blue-300';
+                    else if (log.status === 'Missed') bg = 'bg-red-500/20 border-red-500/40 text-red-300';
+                }
+
+                html += `
+                    <div onclick="openCalendarModal('${dateKey}')" class="aspect-square rounded-xl border ${bg} p-1 flex flex-col justify-between items-center cursor-pointer active:scale-95 transition">
+                        <span class="text-[11px] font-bold">${d}</span>
+                        <span class="text-[8px] truncate">${log ? log.status.slice(0,4) : ''}</span>
+                    </div>`;
+            }
+            grid.innerHTML = html;
+        }
+
+        function openCalendarModal(dateStr) {
+            selectedCalDate = dateStr;
+            document.getElementById('cal-modal-title').innerText = `บันทึกสำหรับ ${dateStr}`;
+            const log = calendarLogs[dateStr] || {};
+            document.getElementById('cal-status').value = log.status || 'Success';
+            document.getElementById('cal-note').value = log.note || '';
+            document.getElementById('calendar-modal').classList.remove('hidden');
+        }
+
+        function closeCalendarModal() { document.getElementById('calendar-modal').classList.add('hidden'); }
+
+        function saveCalendarEntry() {
+            calendarLogs[selectedCalDate] = {
+                status: document.getElementById('cal-status').value,
+                note: document.getElementById('cal-note').value
+            };
+            localStorage.setItem('if_mobile_calendar_logs', JSON.stringify(calendarLogs));
+            closeCalendarModal();
+            renderCalendar();
         }
 
         // --- TIMER FUNCTIONS ---
@@ -389,12 +501,15 @@
         }
 
         function switchTab(t) {
-            document.getElementById('tab-timer').classList.add('hidden');
-            document.getElementById('tab-health').classList.add('hidden');
-            document.getElementById(`tab-${t}`).classList.remove('hidden');
+            ['timer', 'health', 'calendar'].forEach(tab => {
+                document.getElementById(`tab-${tab}`).classList.add('hidden');
+                document.getElementById(`nav-${tab}`).className = 'flex flex-col items-center text-slate-400 space-y-1';
+            });
 
-            document.getElementById('nav-timer').className = t === 'timer' ? 'flex flex-col items-center text-emerald-400 space-y-1' : 'flex flex-col items-center text-slate-400 space-y-1';
-            document.getElementById('nav-health').className = t === 'health' ? 'flex flex-col items-center text-emerald-400 space-y-1' : 'flex flex-col items-center text-slate-400 space-y-1';
+            document.getElementById(`tab-${t}`).classList.remove('hidden');
+            document.getElementById(`nav-${t}`).className = 'flex flex-col items-center text-emerald-400 space-y-1';
+
+            if (t === 'calendar') renderCalendar();
         }
 
         function openWeightModal() {
