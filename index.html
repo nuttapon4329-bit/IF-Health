@@ -98,6 +98,21 @@
             color: var(--text-main);
             -webkit-tap-highlight-color: transparent; 
             transition: background-color 0.3s ease, color 0.3s ease;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 40px rgba(0,0,0,0.15);
         }
 
         .card-element {
@@ -117,288 +132,267 @@
         .art-shadow { box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.15); }
         .theme-dot { transition: transform 0.2s; }
         .theme-dot:active { transform: scale(0.95); }
-
-        /* Responsive Container for Desktop */
-        @media (min-width: 768px) {
-            body {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-            }
-            main, header, nav {
-                max-width: 480px !important;
-                width: 100% !important;
-                left: 50% !important;
-                transform: translateX(-50%);
-                position: relative !important;
-            }
-            header, nav {
-                position: fixed !important;
-            }
-            main {
-                margin-top: 4rem;
-                margin-bottom: 5rem;
-            }
-        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between pb-20 select-none">
+<body class="select-none">
 
-    <!-- Loading Overlay -->
-    <div id="loading-overlay" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md z-50 flex flex-col items-center justify-center text-indigo-500 hidden">
-        <i class="fa-solid fa-circle-notch fa-spin text-3xl mb-2" style="color: var(--accent);"></i>
-        <span class="text-xs font-medium text-slate-300">กำลังซิงค์ข้อมูล...</span>
+    <div class="app-container">
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="absolute inset-0 bg-slate-950/70 backdrop-blur-md z-50 flex flex-col items-center justify-center text-indigo-500 hidden">
+            <i class="fa-solid fa-circle-notch fa-spin text-3xl mb-2" style="color: var(--accent);"></i>
+            <span class="text-xs font-medium text-slate-300">กำลังซิงค์ข้อมูล...</span>
+        </div>
+
+        <!-- Header -->
+        <header class="px-5 py-3.5 card-element border-b sticky top-0 backdrop-blur-md z-40 flex items-center justify-between">
+            <div class="flex items-center space-x-2.5">
+                <div class="w-9 h-9 rounded-2xl flex items-center justify-center shadow-sm" style="background-color: var(--accent-light);">
+                    <i class="fa-solid fa-fire text-base" style="color: var(--accent);"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-base tracking-tight leading-none" style="color: var(--text-main);">Cal & Health Art</h1>
+                    <span class="text-[10px] font-semibold uppercase tracking-wider" style="color: var(--accent);">Soft Dark Edition</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-1.5">
+                <button onclick="toggleDarkMode()" class="p-2.5 input-element rounded-2xl active:scale-95 transition" title="สลับโหมดมืด/สว่าง">
+                    <i id="dark-icon" class="fa-solid fa-moon text-xs text-amber-500"></i>
+                </button>
+                <button onclick="openThemeModal()" class="p-2.5 input-element rounded-2xl active:scale-95 transition" title="เลือกธีมสีอาร์ตๆ">
+                    <i class="fa-solid fa-palette text-xs" style="color: var(--accent);"></i>
+                </button>
+                <button onclick="fetchDataFromSheets()" class="p-2.5 input-element rounded-2xl text-slate-400 active:scale-95 transition" title="รีเฟรช">
+                    <i class="fa-solid fa-arrows-rotate text-xs"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Container -->
+        <main class="px-4 py-4 w-full flex-grow space-y-5 pb-24">
+
+            <!-- TAB 1: CALORIE TRACKER -->
+            <section id="tab-timer" class="space-y-4">
+                <div class="card-element border rounded-3xl p-5 art-shadow space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-500/15 pb-3">
+                        <div>
+                            <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">วันที่บันทึก</span>
+                            <input type="date" id="cal-log-date" onchange="loadDailyFoodLogs()" class="bg-transparent text-xs font-bold focus:outline-none block mt-0.5 cursor-pointer" style="color: var(--accent);">
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">น้ำหนักอ้างอิง</span>
+                            <div class="text-xs font-bold mt-0.5" style="color: var(--text-main);"><span id="current-weight-display">--</span> กก.</div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">เป้าหมาย</span>
+                            <div id="target-cal-display" class="text-xs font-bold text-amber-500 mt-0.5">--</div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2 text-center pt-1">
+                        <div class="input-element p-2.5 rounded-2xl border">
+                            <span class="block text-[9px] text-slate-400 font-medium">ทานไปแล้ว</span>
+                            <span id="total-consumed-cal" class="text-base font-extrabold" style="color: var(--accent);">0</span>
+                        </div>
+                        <div class="input-element p-2.5 rounded-2xl border">
+                            <span class="block text-[9px] text-slate-400 font-medium">คงเหลือ</span>
+                            <span id="remaining-cal" class="text-base font-extrabold text-sky-400">--</span>
+                        </div>
+                        <div class="input-element p-2.5 rounded-2xl border">
+                            <span class="block text-[9px] text-slate-400 font-medium">สถานะ</span>
+                            <span id="cal-status-text" class="text-[11px] font-bold text-slate-400">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- มื้อเช้า -->
+                <div class="card-element border rounded-3xl p-4 art-shadow space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-bold flex items-center gap-1.5" style="color: var(--text-main);">
+                            <i class="fa-solid fa-sun text-amber-400"></i> มื้อเช้า (Breakfast)
+                        </h3>
+                        <span id="sum-breakfast" class="text-xs font-bold text-slate-400">0 kcal</span>
+                    </div>
+                    <div id="container-breakfast" class="space-y-2"></div>
+                    <button onclick="addFoodRow('breakfast')" class="w-full py-2 border border-dashed rounded-xl text-xs font-medium text-slate-400 hover:border-indigo-500 active:scale-95 transition">
+                        <i class="fa-solid fa-plus mr-1"></i> เพิ่มเมนูมื้อเช้า
+                    </button>
+                </div>
+
+                <!-- มื้อเที่ยง -->
+                <div class="card-element border rounded-3xl p-4 art-shadow space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-bold flex items-center gap-1.5" style="color: var(--text-main);">
+                            <i class="fa-solid fa-cloud-sun text-orange-400"></i> มื้อเที่ยง (Lunch)
+                        </h3>
+                        <span id="sum-lunch" class="text-xs font-bold text-slate-400">0 kcal</span>
+                    </div>
+                    <div id="container-lunch" class="space-y-2"></div>
+                    <button onclick="addFoodRow('lunch')" class="w-full py-2 border border-dashed rounded-xl text-xs font-medium text-slate-400 hover:border-indigo-500 active:scale-95 transition">
+                        <i class="fa-solid fa-plus mr-1"></i> เพิ่มเมนูมื้อเที่ยง
+                    </button>
+                </div>
+
+                <!-- มื้อเย็น -->
+                <div class="card-element border rounded-3xl p-4 art-shadow space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-bold flex items-center gap-1.5" style="color: var(--text-main);">
+                            <i class="fa-solid fa-moon text-indigo-400"></i> มื้อเย็น (Dinner)
+                        </h3>
+                        <span id="sum-dinner" class="text-xs font-bold text-slate-400">0 kcal</span>
+                    </div>
+                    <div id="container-dinner" class="space-y-2"></div>
+                    <button onclick="addFoodRow('dinner')" class="w-full py-2 border border-dashed rounded-xl text-xs font-medium text-slate-400 hover:border-indigo-500 active:scale-95 transition">
+                        <i class="fa-solid fa-plus mr-1"></i> เพิ่มเมนูมื้อเย็น
+                    </button>
+                </div>
+
+                <!-- ของว่าง -->
+                <div class="card-element border rounded-3xl p-4 art-shadow space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-bold flex items-center gap-1.5" style="color: var(--text-main);">
+                            <i class="fa-solid fa-cookie-bite text-pink-400"></i> ของว่าง / เครื่องดื่ม (Snacks)
+                        </h3>
+                        <span id="sum-snack" class="text-xs font-bold text-slate-400">0 kcal</span>
+                    </div>
+                    <div id="container-snack" class="space-y-2"></div>
+                    <button onclick="addFoodRow('snack')" class="w-full py-2 border border-dashed rounded-xl text-xs font-medium text-slate-400 hover:border-indigo-500 active:scale-95 transition">
+                        <i class="fa-solid fa-plus mr-1"></i> เพิ่มรายการของว่าง
+                    </button>
+                </div>
+
+                <div class="flex gap-2 pt-2">
+                    <button onclick="clearDayLogs()" class="w-1/3 py-3 font-bold rounded-2xl text-xs border border-rose-500/30 text-rose-400 bg-rose-500/10 active:scale-95 transition">
+                        <i class="fa-solid fa-trash-can mr-1"></i> เคลียร์วันนี้
+                    </button>
+                    <button onclick="saveFoodLogsToLocal()" class="w-2/3 py-3 font-bold rounded-2xl text-sm shadow-md active:scale-95 transition text-white" style="background-color: var(--accent);">
+                        <i class="fa-solid fa-floppy-disk mr-1.5"></i> บันทึกข้อมูลอาหารวันนี้
+                    </button>
+                </div>
+            </section>
+
+            <!-- TAB 2: HEALTH & WEIGHT -->
+            <section id="tab-health" class="hidden space-y-4">
+                <div class="card-element border rounded-3xl p-5 art-shadow space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-sm font-bold" style="color: var(--text-main);"><i class="fa-solid fa-user-pen mr-1.5" style="color: var(--accent);"></i> ข้อมูลและเป้าหมาย</h2>
+                        <button onclick="saveProfileToSheets()" class="px-3 py-1 font-semibold text-xs rounded-xl active:scale-95" style="background-color: var(--accent-light); color: var(--accent);">บันทึกลง Cloud</button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                            <label class="text-slate-400 text-[10px] font-semibold">เพศ</label>
+                            <select id="user-gender" onchange="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2 font-medium">
+                                <option value="male">ชาย</option>
+                                <option value="female">หญิง</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-slate-400 text-[10px] font-semibold">อายุ (ปี)</label>
+                            <input type="number" id="user-age" value="28" oninput="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2 font-medium">
+                        </div>
+                        <div>
+                            <label class="text-slate-400 text-[10px] font-semibold">ส่วนสูง (ซม.)</label>
+                            <input type="number" id="user-height" value="170" oninput="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2 font-medium">
+                        </div>
+                        <div>
+                            <label class="text-slate-400 text-[10px] font-semibold">น้ำหนักเริ่มต้น (กก.)</label>
+                            <input type="number" step="0.1" id="user-weight" value="70" oninput="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2 font-medium">
+                        </div>
+                        <div>
+                            <label class="text-slate-400 text-[10px] font-semibold">น้ำหนักเป้าหมาย (กก.)</label>
+                            <input type="number" step="0.1" id="user-target" value="62" oninput="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2 font-medium">
+                        </div>
+                        <div>
+                            <label class="text-slate-400 text-[10px] font-semibold">เป้าลด/สัปดาห์</label>
+                            <select id="user-loss-rate" onchange="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2 font-bold" style="color: var(--accent);">
+                                <option value="0.25">0.25 กก. (ชิวๆ)</option>
+                                <option value="0.5" selected>0.5 กก. (แนะนำ)</option>
+                                <option value="0.75">0.75 กก. (เข้มข้น)</option>
+                                <option value="1.0">1.0 กก. (เร่งด่วน)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 text-center">
+                    <div class="card-element border p-3 rounded-2xl art-shadow">
+                        <span class="text-[10px] text-slate-400 font-semibold">BMI</span>
+                        <h3 id="bmi-val" class="text-lg font-bold mt-0.5" style="color: var(--accent);">--</h3>
+                        <span id="bmi-status" class="text-[9px] text-slate-400 font-medium">--</span>
+                    </div>
+                    <div class="card-element border p-3 rounded-2xl art-shadow">
+                        <span class="text-[10px] text-slate-400 font-semibold">TDEE (พลังงาน/วัน)</span>
+                        <h3 id="tdee-val" class="text-lg font-bold text-sky-400 mt-0.5">--</h3>
+                        <span class="text-[9px] text-slate-400 font-medium">kcal/วัน</span>
+                    </div>
+                    <div class="card-element border p-3 rounded-2xl art-shadow">
+                        <span class="text-[10px] text-slate-400 font-semibold">เป้าหมายทาน/วัน</span>
+                        <h3 id="cal-target-val" class="text-lg font-bold text-amber-400 mt-0.5">--</h3>
+                        <span class="text-[9px] text-slate-400 font-medium">kcal (เพื่อลดน้ำหนัก)</span>
+                    </div>
+                    <div class="card-element border p-3 rounded-2xl art-shadow">
+                        <span class="text-[10px] text-slate-400 font-semibold">ทานขั้นต่ำสุด/วัน</span>
+                        <h3 id="cal-min-val" class="text-lg font-bold text-rose-400 mt-0.5">--</h3>
+                        <span class="text-[9px] text-rose-400 font-medium">ห้ามต่ำกว่านี้</span>
+                    </div>
+                </div>
+
+                <div class="card-element border rounded-3xl p-4 art-shadow space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-bold" style="color: var(--text-main);">กราฟการลดน้ำหนัก</h3>
+                        <button onclick="openWeightModal()" class="px-3 py-1 text-xs font-bold text-white rounded-xl active:scale-95 shadow-sm" style="background-color: var(--accent);">+ ชั่งน้ำหนัก</button>
+                    </div>
+                    <div class="w-full h-48">
+                        <canvas id="weightChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: CALENDAR LOG -->
+            <section id="tab-calendar" class="hidden space-y-4">
+                <div class="card-element border rounded-3xl p-5 art-shadow space-y-4">
+                    <div class="flex items-center justify-between">
+                        <button onclick="changeMonth(-1)" class="p-2 input-element border rounded-xl text-slate-400 active:scale-95">
+                            <i class="fa-solid fa-chevron-left text-xs"></i>
+                        </button>
+                        <h2 id="calendar-month-year" class="font-bold text-sm" style="color: var(--text-main);">Month Year</h2>
+                        <button onclick="changeMonth(1)" class="p-2 input-element border rounded-xl text-slate-400 active:scale-95">
+                            <i class="fa-solid fa-chevron-right text-xs"></i>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-400">
+                        <span>อา</span><span>จ</span><span>อ</span><span>พ</span><span>พฤ</span><span>ศ</span><span>ส</span>
+                    </div>
+
+                    <div id="calendar-grid" class="grid grid-cols-7 gap-1.5"></div>
+
+                    <div class="pt-3 border-t border-slate-500/15 flex flex-wrap items-center justify-center gap-3 text-[10px] text-slate-400 font-medium">
+                        <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full" style="background-color: var(--accent);"></span><span>ไม่เกินเป้า</span></div>
+                        <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span><span>Cheat Day</span></div>
+                        <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-400"></span><span>เกินเป้า</span></div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Bottom Navigation Bar -->
+        <nav class="absolute bottom-0 inset-x-0 card-element border-t backdrop-blur-lg z-40 px-4 py-2 flex justify-around pb-safe art-shadow">
+            <button onclick="switchTab('timer')" id="nav-timer" class="flex flex-col items-center space-y-1" style="color: var(--accent);">
+                <i class="fa-solid fa-utensils text-lg"></i>
+                <span class="text-[10px] font-bold">Calorie Log</span>
+            </button>
+            <button onclick="switchTab('health')" id="nav-health" class="flex flex-col items-center text-slate-400 space-y-1">
+                <i class="fa-solid fa-chart-line text-lg"></i>
+                <span class="text-[10px] font-medium">Health & Weight</span>
+            </button>
+            <button onclick="switchTab('calendar')" id="nav-calendar" class="flex flex-col items-center text-slate-400 space-y-1">
+                <i class="fa-solid fa-calendar-days text-lg"></i>
+                <span class="text-[10px] font-medium">Calendar</span>
+            </button>
+        </nav>
     </div>
-
-    <!-- Header -->
-    <header class="px-5 py-3.5 card-element border-b sticky top-0 backdrop-blur-md z-40 flex items-center justify-between">
-        <div class="flex items-center space-x-2.5">
-            <div class="w-9 h-9 rounded-2xl flex items-center justify-center shadow-sm" style="background-color: var(--accent-light);">
-                <i class="fa-solid fa-fire text-base" style="color: var(--accent);"></i>
-            </div>
-            <div>
-                <h1 class="font-bold text-base tracking-tight leading-none" style="color: var(--text-main);">Cal & Health Art</h1>
-                <span class="text-[10px] font-semibold uppercase tracking-wider" style="color: var(--accent);">Soft Dark Edition</span>
-            </div>
-        </div>
-        
-        <div class="flex items-center gap-1.5">
-            <button onclick="toggleDarkMode()" class="p-2.5 input-element rounded-2xl active:scale-95 transition" title="สลับโหมดมืด/สว่าง">
-                <i id="dark-icon" class="fa-solid fa-moon text-xs text-amber-500"></i>
-            </button>
-            <button onclick="openThemeModal()" class="p-2.5 input-element rounded-2xl active:scale-95 transition" title="เลือกธีมสีอาร์ตๆ">
-                <i class="fa-solid fa-palette text-xs" style="color: var(--accent);"></i>
-            </button>
-            <button onclick="fetchDataFromSheets()" class="p-2.5 input-element rounded-2xl text-slate-400 active:scale-95 transition" title="รีเฟรช">
-                <i class="fa-solid fa-arrows-rotate text-xs"></i>
-            </button>
-        </div>
-    </header>
-
-    <!-- Main Content Container -->
-    <main class="px-4 py-4 max-w-md mx-auto w-full flex-grow space-y-5">
-
-        <!-- TAB 1: CALORIE TRACKER -->
-        <section id="tab-timer" class="space-y-4">
-            <div class="card-element border rounded-3xl p-5 art-shadow space-y-3">
-                <div class="flex items-center justify-between border-b border-slate-500/10 pb-3">
-                    <div>
-                        <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">วันที่บันทึก</span>
-                        <input type="date" id="cal-log-date" onchange="loadDailyFoodLogs()" class="bg-transparent text-xs font-bold focus:outline-none block mt-0.5" style="color: var(--accent);">
-                    </div>
-                    <div class="text-right">
-                        <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">น้ำหนักอ้างอิง</span>
-                        <div class="text-xs font-bold mt-0.5" style="color: var(--text-main);"><span id="current-weight-display">--</span> กก.</div>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">เป้าหมาย</span>
-                        <div id="target-cal-display" class="text-xs font-bold text-amber-500 mt-0.5">--</div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-3 gap-2 text-center pt-1">
-                    <div class="input-element p-2.5 rounded-2xl border">
-                        <span class="block text-[9px] text-slate-400 font-medium">ทานไปแล้ว</span>
-                        <span id="total-consumed-cal" class="text-base font-extrabold" style="color: var(--accent);">0</span>
-                    </div>
-                    <div class="input-element p-2.5 rounded-2xl border">
-                        <span class="block text-[9px] text-slate-400 font-medium">คงเหลือ</span>
-                        <span id="remaining-cal" class="text-base font-extrabold text-sky-400">--</span>
-                    </div>
-                    <div class="input-element p-2.5 rounded-2xl border">
-                        <span class="block text-[9px] text-slate-400 font-medium">สถานะ</span>
-                        <span id="cal-status-text" class="text-[11px] font-bold text-slate-400">-</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- มื้อเช้า -->
-            <div class="card-element border rounded-3xl p-4 art-shadow space-y-3">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-xs font-bold flex items-center gap-1.5" style="color: var(--text-main);">
-                        <i class="fa-solid fa-sun text-amber-400"></i> มื้อเช้า (Breakfast)
-                    </h3>
-                    <span id="sum-breakfast" class="text-xs font-bold text-slate-400">0 kcal</span>
-                </div>
-                <div id="container-breakfast" class="space-y-2"></div>
-                <button onclick="addFoodRow('breakfast')" class="w-full py-2 border border-dashed rounded-xl text-xs font-medium text-slate-400 hover:border-indigo-500 active:scale-95 transition">
-                    <i class="fa-solid fa-plus mr-1"></i> เพิ่มเมนูมื้อเช้า
-                </button>
-            </div>
-
-            <!-- มื้อเที่ยง -->
-            <div class="card-element border rounded-3xl p-4 art-shadow space-y-3">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-xs font-bold flex items-center gap-1.5" style="color: var(--text-main);">
-                        <i class="fa-solid fa-cloud-sun text-orange-400"></i> มื้อเที่ยง (Lunch)
-                    </h3>
-                    <span id="sum-lunch" class="text-xs font-bold text-slate-400">0 kcal</span>
-                </div>
-                <div id="container-lunch" class="space-y-2"></div>
-                <button onclick="addFoodRow('lunch')" class="w-full py-2 border border-dashed rounded-xl text-xs font-medium text-slate-400 hover:border-indigo-500 active:scale-95 transition">
-                    <i class="fa-solid fa-plus mr-1"></i> เพิ่มเมนูมื้อเที่ยง
-                </button>
-            </div>
-
-            <!-- มื้อเย็น -->
-            <div class="card-element border rounded-3xl p-4 art-shadow space-y-3">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-xs font-bold flex items-center gap-1.5" style="color: var(--text-main);">
-                        <i class="fa-solid fa-moon text-indigo-400"></i> มื้อเย็น (Dinner)
-                    </h3>
-                    <span id="sum-dinner" class="text-xs font-bold text-slate-400">0 kcal</span>
-                </div>
-                <div id="container-dinner" class="space-y-2"></div>
-                <button onclick="addFoodRow('dinner')" class="w-full py-2 border border-dashed rounded-xl text-xs font-medium text-slate-400 hover:border-indigo-500 active:scale-95 transition">
-                    <i class="fa-solid fa-plus mr-1"></i> เพิ่มเมนูมื้อเย็น
-                </button>
-            </div>
-
-            <!-- ของว่าง -->
-            <div class="card-element border rounded-3xl p-4 art-shadow space-y-3">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-xs font-bold flex items-center gap-1.5" style="color: var(--text-main);">
-                        <i class="fa-solid fa-cookie-bite text-pink-400"></i> ของว่าง / เครื่องดื่ม (Snacks)
-                    </h3>
-                    <span id="sum-snack" class="text-xs font-bold text-slate-400">0 kcal</span>
-                </div>
-                <div id="container-snack" class="space-y-2"></div>
-                <button onclick="addFoodRow('snack')" class="w-full py-2 border border-dashed rounded-xl text-xs font-medium text-slate-400 hover:border-indigo-500 active:scale-95 transition">
-                    <i class="fa-solid fa-plus mr-1"></i> เพิ่มรายการของว่าง
-                </button>
-            </div>
-
-            <div class="flex gap-2 pt-2">
-                <button onclick="clearDayLogs()" class="w-1/3 py-3 font-bold rounded-2xl text-xs border border-rose-500/30 text-rose-400 bg-rose-500/10 active:scale-95 transition">
-                    <i class="fa-solid fa-trash-can mr-1"></i> เคลียร์วันนี้
-                </button>
-                <button onclick="saveFoodLogsToLocal()" class="w-2/3 py-3 font-bold rounded-2xl text-sm shadow-md active:scale-95 transition text-white" style="background-color: var(--accent);">
-                    <i class="fa-solid fa-floppy-disk mr-1.5"></i> บันทึกข้อมูลอาหารวันนี้
-                </button>
-            </div>
-        </section>
-
-        <!-- TAB 2: HEALTH & WEIGHT -->
-        <section id="tab-health" class="hidden space-y-4">
-            <div class="card-element border rounded-3xl p-5 art-shadow space-y-3">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-sm font-bold" style="color: var(--text-main);"><i class="fa-solid fa-user-pen mr-1.5" style="color: var(--accent);"></i> ข้อมูลและเป้าหมาย</h2>
-                    <button onclick="saveProfileToSheets()" class="px-3 py-1 font-semibold text-xs rounded-xl active:scale-95" style="background-color: var(--accent-light); color: var(--accent);">บันทึกลง Cloud</button>
-                </div>
-                <div class="grid grid-cols-2 gap-2 text-xs">
-                    <div>
-                        <label class="text-slate-400 text-[10px] font-semibold">เพศ</label>
-                        <select id="user-gender" onchange="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2 font-medium">
-                            <option value="male">ชาย</option>
-                            <option value="female">หญิง</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-slate-400 text-[10px] font-semibold">อายุ (ปี)</label>
-                        <input type="number" id="user-age" value="28" oninput="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2 font-medium">
-                    </div>
-                    <div>
-                        <label class="text-slate-400 text-[10px] font-semibold">ส่วนสูง (ซม.)</label>
-                        <input type="number" id="user-height" value="170" oninput="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2 font-medium">
-                    </div>
-                    <div>
-                        <label class="text-slate-400 text-[10px] font-semibold">น้ำหนักเริ่มต้น (กก.)</label>
-                        <input type="number" step="0.1" id="user-weight" value="70" oninput="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2 font-medium">
-                    </div>
-                    <div>
-                        <label class="text-slate-400 text-[10px] font-semibold">น้ำหนักเป้าหมาย (กก.)</label>
-                        <input type="number" step="0.1" id="user-target" value="62" oninput="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2 font-medium">
-                    </div>
-                    <div>
-                        <label class="text-slate-400 text-[10px] font-semibold">เป้าลด/สัปดาห์</label>
-                        <select id="user-loss-rate" onchange="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2 font-bold" style="color: var(--accent);">
-                            <option value="0.25">0.25 กก. (ชิวๆ)</option>
-                            <option value="0.5" selected>0.5 กก. (แนะนำ)</option>
-                            <option value="0.75">0.75 กก. (เข้มข้น)</option>
-                            <option value="1.0">1.0 กก. (เร่งด่วน)</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-                <div class="card-element border p-3 rounded-2xl art-shadow">
-                    <span class="text-[10px] text-slate-400 font-semibold">BMI</span>
-                    <h3 id="bmi-val" class="text-lg font-bold mt-0.5" style="color: var(--accent);">--</h3>
-                    <span id="bmi-status" class="text-[9px] text-slate-400 font-medium">--</span>
-                </div>
-                <div class="card-element border p-3 rounded-2xl art-shadow">
-                    <span class="text-[10px] text-slate-400 font-semibold">TDEE (พลังงาน/วัน)</span>
-                    <h3 id="tdee-val" class="text-lg font-bold text-sky-400 mt-0.5">--</h3>
-                    <span class="text-[9px] text-slate-400 font-medium">kcal/วัน</span>
-                </div>
-                <div class="card-element border p-3 rounded-2xl art-shadow">
-                    <span class="text-[10px] text-slate-400 font-semibold">เป้าหมายทาน/วัน</span>
-                    <h3 id="cal-target-val" class="text-lg font-bold text-amber-400 mt-0.5">--</h3>
-                    <span class="text-[9px] text-slate-400 font-medium">kcal (เพื่อลดน้ำหนัก)</span>
-                </div>
-                <div class="card-element border p-3 rounded-2xl art-shadow">
-                    <span class="text-[10px] text-slate-400 font-semibold">ทานขั้นต่ำสุด/วัน</span>
-                    <h3 id="cal-min-val" class="text-lg font-bold text-rose-400 mt-0.5">--</h3>
-                    <span class="text-[9px] text-rose-400 font-medium">ห้ามต่ำกว่านี้</span>
-                </div>
-            </div>
-
-            <div class="card-element border rounded-3xl p-4 art-shadow space-y-3">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-xs font-bold" style="color: var(--text-main);">กราฟการลดน้ำหนัก</h3>
-                    <button onclick="openWeightModal()" class="px-3 py-1 text-xs font-bold text-white rounded-xl active:scale-95 shadow-sm" style="background-color: var(--accent);">+ ชั่งน้ำหนัก</button>
-                </div>
-                <div class="w-full h-48">
-                    <canvas id="weightChart"></canvas>
-                </div>
-            </div>
-        </section>
-
-        <!-- TAB 3: CALENDAR LOG -->
-        <section id="tab-calendar" class="hidden space-y-4">
-            <div class="card-element border rounded-3xl p-5 art-shadow space-y-4">
-                <div class="flex items-center justify-between">
-                    <button onclick="changeMonth(-1)" class="p-2 input-element border rounded-xl text-slate-400 active:scale-95">
-                        <i class="fa-solid fa-chevron-left text-xs"></i>
-                    </button>
-                    <h2 id="calendar-month-year" class="font-bold text-sm" style="color: var(--text-main);">Month Year</h2>
-                    <button onclick="changeMonth(1)" class="p-2 input-element border rounded-xl text-slate-400 active:scale-95">
-                        <i class="fa-solid fa-chevron-right text-xs"></i>
-                    </button>
-                </div>
-
-                <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-400">
-                    <span>อา</span><span>จ</span><span>อ</span><span>พ</span><span>พฤ</span><span>ศ</span><span>ส</span>
-                </div>
-
-                <div id="calendar-grid" class="grid grid-cols-7 gap-1.5"></div>
-
-                <div class="pt-3 border-t border-slate-500/10 flex flex-wrap items-center justify-center gap-3 text-[10px] text-slate-400 font-medium">
-                    <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full" style="background-color: var(--accent);"></span><span>ไม่เกินเป้า</span></div>
-                    <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span><span>Cheat Day</span></div>
-                    <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-400"></span><span>เกินเป้า</span></div>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- Bottom Navigation Bar -->
-    <nav class="fixed bottom-0 inset-x-0 card-element border-t backdrop-blur-lg z-40 px-4 py-2 flex justify-around pb-safe art-shadow">
-        <button onclick="switchTab('timer')" id="nav-timer" class="flex flex-col items-center space-y-1" style="color: var(--accent);">
-            <i class="fa-solid fa-utensils text-lg"></i>
-            <span class="text-[10px] font-bold">Calorie Log</span>
-        </button>
-        <button onclick="switchTab('health')" id="nav-health" class="flex flex-col items-center text-slate-400 space-y-1">
-            <i class="fa-solid fa-chart-line text-lg"></i>
-            <span class="text-[10px] font-medium">Health & Weight</span>
-        </button>
-        <button onclick="switchTab('calendar')" id="nav-calendar" class="flex flex-col items-center text-slate-400 space-y-1">
-            <i class="fa-solid fa-calendar-days text-lg"></i>
-            <span class="text-[10px] font-medium">Calendar</span>
-        </button>
-    </nav>
 
     <!-- Modal Themes -->
     <div id="theme-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4 hidden">
@@ -438,7 +432,7 @@
             <h3 class="font-bold text-sm" style="color: var(--text-main);">บันทึกน้ำหนักวันนี้</h3>
             <div>
                 <label class="text-[10px] text-slate-400 font-semibold">วันที่</label>
-                <input type="date" id="log-date" class="w-full input-element border rounded-xl p-2.5 text-xs font-medium">
+                <input type="date" id="log-date" class="w-full input-element border rounded-xl p-2.5 text-xs font-medium cursor-pointer">
             </div>
             <div>
                 <label class="text-[10px] text-slate-400 font-semibold">น้ำหนัก (กก.)</label>
@@ -891,7 +885,7 @@
             document.getElementById('weight-modal').classList.remove('hidden');
         }
         function closeWeightModal() { document.getElementById('weight-modal').classList.add('hidden'); }
-        function showLoading(show) { document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none'; }
+        function showLoading(show) { document.getElementById('loading-overlaystyle').style.display = show ? 'flex' : 'none'; }
     </script>
 </body>
 </html>
