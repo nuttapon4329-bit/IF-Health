@@ -480,8 +480,7 @@
         }
 
         function getDefaultProfile() {
-            return { gender: "male", age: 28, height: 170, weight: 70, targetWeight: 62, activityLevel: "light",
-        activityLevel: "light", theme: "default", darkMode: false };
+            return { gender: "male", age: 28, height: 170, weight: 70, targetWeight: 62, activityLevel: "light", theme: "default", darkMode: false };
         }
 
         function loadCache() {
@@ -996,12 +995,18 @@
        ACTIVITY FACTOR
     ========================= */
 
+    // อ่านค่าจาก dropdown โดยตรง เพื่อให้เปลี่ยนระดับกิจกรรมแล้ว TDEE เปลี่ยนทันที
+    const activitySelect =
+        document.getElementById('user-activity');
+
     const activityLevel =
-        (typeof profile !== 'undefined' &&
-         profile &&
-         profile.activityLevel)
-            ? profile.activityLevel
-            : 'light';
+        activitySelect && activitySelect.value
+            ? activitySelect.value
+            : ((typeof profileData !== 'undefined' &&
+                profileData &&
+                profileData.activityLevel)
+                ? profileData.activityLevel
+                : 'light');
 
     const activityFactors = {
         sedentary: 1.20,
