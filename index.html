@@ -288,6 +288,16 @@
                         <input type="number" step="0.1" id="user-target" value="62" oninput="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2 font-medium">
                     </div>
                     <div>
+                        <label class="text-slate-400 text-[10px] font-semibold">ระดับกิจกรรม</label>
+                        <select id="user-activity" onchange="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2 font-medium">
+                            <option value="sedentary">นั่งเป็นส่วนใหญ่ (ไม่ออกกำลัง)</option>
+                            <option value="light" selected>ออกกำลังเบา 1–3 วัน/สัปดาห์</option>
+                            <option value="moderate">ออกกำลังปานกลาง 3–5 วัน/สัปดาห์</option>
+                            <option value="veryActive">ออกกำลังหนัก 6–7 วัน/สัปดาห์</option>
+                            <option value="extraActive">ออกกำลังหนักมาก / งานใช้แรง</option>
+                        </select>
+                    </div>
+                    <div>
                         <label class="text-slate-400 text-[10px] font-semibold">เป้าลด/สัปดาห์</label>
                         <select id="user-loss-rate" onchange="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2 font-bold" style="color: var(--accent);">
                             <option value="0.25">0.25 กก. (ชิวๆ)</option>
@@ -470,7 +480,7 @@
         }
 
         function getDefaultProfile() {
-            return { gender: "male", age: 28, height: 170, weight: 70, targetWeight: 62, theme: "default", darkMode: false };
+            return { gender: "male", age: 28, height: 170, weight: 70, targetWeight: 62, activityLevel: "light", theme: "default", darkMode: false };
         }
 
         function loadCache() {
@@ -634,6 +644,7 @@
                 height: profileData.height || Number(document.getElementById('user-height').value),
                 weight: profileData.weight || Number(document.getElementById('user-weight').value),
                 targetWeight: profileData.targetWeight || Number(document.getElementById('user-target').value),
+                activityLevel: profileData.activityLevel || document.getElementById('user-activity').value || 'light',
                 theme: profileData.theme || 'default',
                 darkMode: !!profileData.darkMode
             };
@@ -658,6 +669,7 @@
             profileData.height = Number(document.getElementById('user-height').value);
             profileData.weight = Number(document.getElementById('user-weight').value);
             profileData.targetWeight = Number(document.getElementById('user-target').value);
+            profileData.activityLevel = document.getElementById('user-activity').value;
 
             saveCache();
             updateUIProfile();
@@ -888,6 +900,7 @@
             document.getElementById('user-height').value = profileData.height || 170;
             document.getElementById('user-weight').value = profileData.weight || 70;
             document.getElementById('user-target').value = profileData.targetWeight || 62;
+            document.getElementById('user-activity').value = profileData.activityLevel || 'light';
         }
 
         function applyCloudSettings() {
@@ -930,7 +943,17 @@
 
             let bmr = (10 * latestWeight) + (6.25 * height) - (5 * age);
             bmr = gender === 'male' ? bmr + 5 : bmr - 161;
-            const tdee = bmr * 1.375;
+
+            const activityFactors = {
+                sedentary: 1.2,
+                light: 1.375,
+                moderate: 1.55,
+                veryActive: 1.725,
+                extraActive: 1.9
+            };
+            const activityLevel = document.getElementById('user-activity').value || profileData.activityLevel || 'light';
+            const activityFactor = activityFactors[activityLevel] || 1.375;
+            const tdee = bmr * activityFactor;
             document.getElementById('tdee-val').innerText = Math.round(tdee).toLocaleString();
 
             const dailyDeficit = (lossRate * 7700) / 7;
