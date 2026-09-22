@@ -480,7 +480,8 @@
         }
 
         function getDefaultProfile() {
-            return { gender: "male", age: 28, height: 170, weight: 70, targetWeight: 62, activityLevel: "light", theme: "default", darkMode: false };
+            return { gender: "male", age: 28, height: 170, weight: 70, targetWeight: 62, activityLevel: "light",
+        activityLevel: "light", theme: "default", darkMode: false };
         }
 
         function loadCache() {
@@ -919,54 +920,180 @@
         }
 
         function calculateHealthMetrics() {
-            const gender = document.getElementById('user-gender').value;
-            const age = Number(document.getElementById('user-age').value) || 28;
-            const height = Number(document.getElementById('user-height').value) || 170;
+    const gender = document.getElementById('user-gender').value;
+    const age = Number(document.getElementById('user-age').value) || 28;
+    const height = Number(document.getElementById('user-height').value) || 170;
 
-            let latestWeight = Number(document.getElementById('user-weight').value) || 70;
-            if (weightLogs && weightLogs.length > 0) {
-                const sortedLogs = [...weightLogs].sort((a, b) => new Date(b.date) - new Date(a.date));
-                latestWeight = Number(sortedLogs[0].weight) || latestWeight;
-            }
+    let latestWeight =
+        Number(document.getElementById('user-weight').value) || 70;
 
-            document.getElementById('current-weight-display').innerText = latestWeight;
-            const lossRate = Number(document.getElementById('user-loss-rate').value) || 0.5;
-            const hM = height / 100;
-            const bmi = (latestWeight / (hM * hM)).toFixed(1);
-            document.getElementById('bmi-val').innerText = bmi;
+    // ใช้น้ำหนักจากวันที่ล่าสุดจริง
+    if (weightLogs && weightLogs.length > 0) {
+        const sortedLogs = [...weightLogs].sort(
+            (a, b) => new Date(b.date) - new Date(a.date)
+        );
 
-            let bmiText = "สมส่วน";
-            if (bmi < 18.5) bmiText = "ผอมไป";
-            else if (bmi >= 23 && bmi < 25) bmiText = "ท้วม";
-            else if (bmi >= 25) bmiText = "อ้วน";
-            document.getElementById('bmi-status').innerText = bmiText;
+        latestWeight =
+            Number(sortedLogs[0].weight) || latestWeight;
+    }
 
-            let bmr = (10 * latestWeight) + (6.25 * height) - (5 * age);
-            bmr = gender === 'male' ? bmr + 5 : bmr - 161;
+    const currentWeightDisplay =
+        document.getElementById('current-weight-display');
 
-            const activityFactors = {
-                sedentary: 1.2,
-                light: 1.375,
-                moderate: 1.55,
-                veryActive: 1.725,
-                extraActive: 1.9
-            };
-            const activityLevel = document.getElementById('user-activity').value || profileData.activityLevel || 'light';
-            const activityFactor = activityFactors[activityLevel] || 1.375;
-            const tdee = bmr * activityFactor;
-            document.getElementById('tdee-val').innerText = Math.round(tdee).toLocaleString();
+    if (currentWeightDisplay) {
+        currentWeightDisplay.innerText = latestWeight;
+    }
 
-            const dailyDeficit = (lossRate * 7700) / 7;
-            let targetCal = Math.round(tdee - dailyDeficit);
-            const minSafetyCal = Math.round(bmr);
-            if (targetCal < minSafetyCal) targetCal = minSafetyCal;
+    const lossRate =
+        Number(document.getElementById('user-loss-rate').value) || 0.5;
 
-            document.getElementById('cal-target-val').innerText = targetCal.toLocaleString();
-            document.getElementById('target-cal-display').innerText = targetCal.toLocaleString() + ' kcal';
-            document.getElementById('cal-min-val').innerText = minSafetyCal.toLocaleString();
+    const hM = height / 100;
 
-            calculateTotalCalories();
-        }
+    const bmi =
+        latestWeight / (hM * hM);
+
+    const bmiVal =
+        document.getElementById('bmi-val');
+
+    if (bmiVal) {
+        bmiVal.innerText = bmi.toFixed(1);
+    }
+
+    let bmiText = "สมส่วน";
+
+    if (bmi < 18.5) {
+        bmiText = "ผอมไป";
+    } else if (bmi >= 23 && bmi < 25) {
+        bmiText = "ท้วม";
+    } else if (bmi >= 25) {
+        bmiText = "อ้วน";
+    }
+
+    const bmiStatus =
+        document.getElementById('bmi-status');
+
+    if (bmiStatus) {
+        bmiStatus.innerText = bmiText;
+    }
+
+
+    /* =========================
+       BMR : Mifflin-St Jeor
+    ========================= */
+
+    let bmr =
+        (10 * latestWeight) +
+        (6.25 * height) -
+        (5 * age);
+
+    bmr =
+        gender === 'male'
+            ? bmr + 5
+            : bmr - 161;
+
+
+    /* =========================
+       ACTIVITY FACTOR
+    ========================= */
+
+    const activityLevel =
+        (typeof profile !== 'undefined' &&
+         profile &&
+         profile.activityLevel)
+            ? profile.activityLevel
+            : 'light';
+
+    const activityFactors = {
+        sedentary: 1.20,
+        light: 1.375,
+        moderate: 1.55,
+        veryActive: 1.725,
+        extraActive: 1.90
+    };
+
+    const activityFactor =
+        activityFactors[activityLevel] || 1.375;
+
+
+    /* =========================
+       TDEE
+    ========================= */
+
+    const tdee =
+        bmr * activityFactor;
+
+    const tdeeVal =
+        document.getElementById('tdee-val');
+
+    if (tdeeVal) {
+        tdeeVal.innerText =
+            Math.round(tdee).toLocaleString();
+    }
+
+
+    /* =========================
+       CALORIE DEFICIT
+    ========================= */
+
+    const dailyDeficit =
+        (lossRate * 7700) / 7;
+
+    let targetCal =
+        Math.round(tdee - dailyDeficit);
+
+
+    /* =========================
+       MINIMUM CALORIE FLOOR
+
+       ไม่ใช้ BMR เป็นขั้นต่ำ
+       ชาย   = 1,500 kcal
+       หญิง = 1,200 kcal
+    ========================= */
+
+    const minSafetyCal =
+        gender === 'male'
+            ? 1500
+            : 1200;
+
+    if (targetCal < minSafetyCal) {
+        targetCal = minSafetyCal;
+    }
+
+
+    /* =========================
+       DISPLAY
+    ========================= */
+
+    const targetVal =
+        document.getElementById('cal-target-val');
+
+    if (targetVal) {
+        targetVal.innerText =
+            targetCal.toLocaleString();
+    }
+
+    const targetDisplay =
+        document.getElementById('target-cal-display');
+
+    if (targetDisplay) {
+        targetDisplay.innerText =
+            targetCal.toLocaleString() + ' kcal';
+    }
+
+    const minVal =
+        document.getElementById('cal-min-val');
+
+    if (minVal) {
+        minVal.innerText =
+            minSafetyCal.toLocaleString();
+    }
+
+
+    // อัปเดตข้อมูลสำหรับส่วนอื่นของหน้า
+    if (typeof calculateTotalCalories === 'function') {
+        calculateTotalCalories();
+    }
+}
 
         function initOrUpdateChart() {
             const canvas = document.getElementById('weightChart');
