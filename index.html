@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>IF & Health Mobile App (Pastel Edition)</title>
+    <title>IF & Health Mobile App (Soft Dark Edition)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -23,77 +23,74 @@
             }
         }
     </script>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* Artistic Color Schemes & Soft Dark Mode */
         :root {
-            --bg-main: #f4f8f5;
+            --bg-main: #f8fafc;
             --bg-card: #ffffff;
-            --bg-input: #f8fafc;
-            --border-color: #f1f5f9;
-            --accent: #10b981;
-            --accent-light: #e6f4ea;
-            --text-main: #1e293b;
-            --text-sub: #64748b;
-            --ring-color: #10b981;
+            --bg-input: #f1f5f9;
+            --border-color: #e2e8f0;
+            --accent: #6366f1; /* Indigo Art */
+            --accent-light: #e0e7ff;
+            --text-main: #0f172a;
+            --text-sub: #475569;
         }
 
-        [data-theme="sakura"] {
-            --bg-main: #fdf2f8;
+        [data-theme="sunset"] {
+            --bg-main: #fff1f2;
             --bg-card: #ffffff;
-            --bg-input: #fdf2f8;
-            --border-color: #fce7f3;
-            --accent: #ec4899;
-            --accent-light: #fce7f3;
-            --text-main: #331829;
-            --text-sub: #9d527c;
-            --ring-color: #ec4899;
+            --bg-input: #ffe4e6;
+            --border-color: #fecdd3;
+            --accent: #f43f5e; /* Rose Sunset */
+            --accent-light: #ffe4e6;
+            --text-main: #4c0519;
+            --text-sub: #881337;
         }
 
-        [data-theme="lavender"] {
-            --bg-main: #faf5ff;
+        [data-theme="emerald"] {
+            --bg-main: #f0fdf4;
             --bg-card: #ffffff;
-            --bg-input: #faf5ff;
-            --border-color: #f3e8ff;
-            --accent: #a855f7;
-            --accent-light: #f3e8ff;
-            --text-main: #241434;
-            --text-sub: #7e52a0;
-            --ring-color: #a855f7;
+            --bg-input: #dcfce7;
+            --border-color: #bbf7d0;
+            --accent: #059669; /* Rich Emerald */
+            --accent-light: #dcfce7;
+            --text-main: #022c22;
+            --text-sub: #065f46;
         }
 
-        [data-theme="sky"] {
-            --bg-main: #f0f9ff;
+        [data-theme="cyberpunk"] {
+            --bg-main: #fdf4ff;
             --bg-card: #ffffff;
-            --bg-input: #f0f9ff;
-            --border-color: #e0f2fe;
-            --accent: #0284c7;
-            --accent-light: #e0f2fe;
-            --text-main: #0c2340;
-            --text-sub: #477096;
-            --ring-color: #0284c7;
+            --bg-input: #fae8ff;
+            --border-color: #f5d0fe;
+            --accent: #d946ef; /* Neon Orchid */
+            --accent-light: #fae8ff;
+            --text-main: #4a044e;
+            --text-sub: #86198f;
         }
 
-        [data-theme="peach"] {
-            --bg-main: #fff7ed;
+        [data-theme="amber"] {
+            --bg-main: #fffbeb;
             --bg-card: #ffffff;
-            --bg-input: #fff7ed;
-            --border-color: #ffedd5;
-            --accent: #f97316;
-            --accent-light: #ffedd5;
-            --text-main: #361705;
-            --text-sub: #9a5828;
-            --ring-color: #f97316;
+            --bg-input: #fef3c7;
+            --border-color: #fde68a;
+            --accent: #d97706; /* Sunset Amber */
+            --accent-light: #fef3c7;
+            --text-main: #451a03;
+            --text-sub: #92400e;
         }
 
+        /* Soft & Cozy Dark Mode */
         html.dark {
-            --bg-main: #0b0f17;
-            --bg-card: #151c28;
-            --bg-input: #1e293b;
-            --border-color: #1e293b;
-            --accent-light: rgba(255, 255, 255, 0.08);
-            --text-main: #f8fafc;
+            --bg-main: #131b2e;      /* นวลขึ้น ไม่ดำทึบ (Deep Midnight Slate) */
+            --bg-card: #1c263d;      /* การ์ดสีนุ่มกลมกลืน มีมิติ */
+            --bg-input: #25334d;     /* ช่องกรอกข้อมูลสีนวลตา */
+            --border-color: #2d3e5b; /* เส้นขอบละมุน ไม่ตัดแข็งจนเกินไป */
+            --accent-light: rgba(99, 102, 241, 0.2);
+            --text-main: #f1f5f9;
             --text-sub: #94a3b8;
         }
 
@@ -108,7 +105,8 @@
         .card-element {
             background-color: var(--bg-card);
             border-color: var(--border-color);
-            transition: background-color 0.3s ease, border-color 0.3s ease;
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
         }
 
         .input-element {
@@ -118,39 +116,39 @@
         }
 
         .pb-safe { padding-bottom: env(safe-area-inset-bottom, 5rem); }
-        .soft-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03); }
+        .art-shadow { box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.15); }
         .theme-dot { transition: transform 0.2s; }
-        .theme-dot:active { transform: scale(0.9); }
+        .theme-dot:active { transform: scale(0.95); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between pb-20 select-none">
 
     <!-- Loading Overlay -->
-    <div id="loading-overlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex flex-col items-center justify-center text-emerald-500 hidden">
+    <div id="loading-overlay" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md z-50 flex flex-col items-center justify-center text-indigo-500 hidden">
         <i class="fa-solid fa-circle-notch fa-spin text-3xl mb-2" style="color: var(--accent);"></i>
         <span class="text-xs font-medium text-slate-300">กำลังซิงค์ข้อมูล...</span>
     </div>
 
     <!-- Header -->
-    <header class="px-5 py-3.5 card-element border-b sticky top-0 backdrop-blur-md z-40 flex items-center justify-between soft-shadow">
+    <header class="px-5 py-3.5 card-element border-b sticky top-0 backdrop-blur-md z-40 flex items-center justify-between">
         <div class="flex items-center space-x-2.5">
-            <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background-color: var(--accent-light);">
-                <i class="fa-solid fa-utensils text-base" style="color: var(--accent);"></i>
+            <div class="w-9 h-9 rounded-2xl flex items-center justify-center shadow-sm" style="background-color: var(--accent-light);">
+                <i class="fa-solid fa-fire text-base" style="color: var(--accent);"></i>
             </div>
             <div>
-                <h1 class="font-bold text-base tracking-tight leading-none" style="color: var(--text-main);">Cal & Health Pro</h1>
-                <span class="text-[10px] font-medium" style="color: var(--accent);">Pastel Edition</span>
+                <h1 class="font-bold text-base tracking-tight leading-none" style="color: var(--text-main);">Cal & Health Art</h1>
+                <span class="text-[10px] font-semibold uppercase tracking-wider" style="color: var(--accent);">Soft Dark Edition</span>
             </div>
         </div>
         
         <div class="flex items-center gap-1.5">
-            <button onclick="toggleDarkMode()" class="p-2.5 input-element rounded-xl active:scale-95 transition" title="สลับโหมดมืด/สว่าง">
-                <i id="dark-icon" class="fa-solid fa-moon text-xs text-amber-400"></i>
+            <button onclick="toggleDarkMode()" class="p-2.5 input-element rounded-2xl active:scale-95 transition" title="สลับโหมดมืด/สว่าง">
+                <i id="dark-icon" class="fa-solid fa-moon text-xs text-amber-500"></i>
             </button>
-            <button onclick="openThemeModal()" class="p-2.5 input-element rounded-xl active:scale-95 transition" title="เลือกธีมพาสเทล">
+            <button onclick="openThemeModal()" class="p-2.5 input-element rounded-2xl active:scale-95 transition" title="เลือกธีมสีอาร์ตๆ">
                 <i class="fa-solid fa-palette text-xs" style="color: var(--accent);"></i>
             </button>
-            <button onclick="fetchDataFromSheets()" class="p-2.5 input-element rounded-xl text-slate-400 active:scale-95 transition" title="รีเฟรช">
+            <button onclick="fetchDataFromSheets()" class="p-2.5 input-element rounded-2xl text-slate-400 active:scale-95 transition" title="รีเฟรช">
                 <i class="fa-solid fa-arrows-rotate text-xs"></i>
             </button>
         </div>
@@ -162,41 +160,41 @@
         <!-- TAB 1: CALORIE TRACKER -->
         <section id="tab-timer" class="space-y-4">
             <!-- วันที่ น้ำหนักปัจจุบัน และเป้าหมายแคลอรี -->
-            <div class="card-element border rounded-3xl p-5 soft-shadow space-y-3">
+            <div class="card-element border rounded-3xl p-5 art-shadow space-y-3">
                 <div class="flex items-center justify-between border-b border-slate-500/10 pb-3">
                     <div>
-                        <span class="text-[10px] text-slate-400 uppercase font-semibold">วันที่บันทึก</span>
-                        <input type="date" id="cal-log-date" onchange="loadDailyFoodLogs()" class="bg-transparent text-xs font-semibold focus:outline-none block mt-0.5" style="color: var(--accent);">
+                        <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">วันที่บันทึก</span>
+                        <input type="date" id="cal-log-date" onchange="loadDailyFoodLogs()" class="bg-transparent text-xs font-bold focus:outline-none block mt-0.5" style="color: var(--accent);">
                     </div>
                     <div class="text-right">
-                        <span class="text-[10px] text-slate-400 uppercase font-semibold">น้ำหนักปัจจุบันอ้างอิง</span>
+                        <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">น้ำหนักอ้างอิง</span>
                         <div class="text-xs font-bold mt-0.5" style="color: var(--text-main);"><span id="current-weight-display">--</span> กก.</div>
                     </div>
                     <div class="text-right">
-                        <span class="text-[10px] text-slate-400 uppercase font-semibold">เป้าหมาย (Kcal)</span>
-                        <div id="target-cal-display" class="text-xs font-bold text-amber-400 mt-0.5">--</div>
+                        <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">เป้าหมาย</span>
+                        <div id="target-cal-display" class="text-xs font-bold text-amber-500 mt-0.5">--</div>
                     </div>
                 </div>
 
                 <!-- สรุปแคลอรีภาพรวม -->
                 <div class="grid grid-cols-3 gap-2 text-center pt-1">
-                    <div class="input-element p-2 rounded-2xl border">
-                        <span class="block text-[9px] text-slate-400">ทานไปแล้ว</span>
+                    <div class="input-element p-2.5 rounded-2xl border">
+                        <span class="block text-[9px] text-slate-400 font-medium">ทานไปแล้ว</span>
                         <span id="total-consumed-cal" class="text-base font-extrabold" style="color: var(--accent);">0</span>
                     </div>
-                    <div class="input-element p-2 rounded-2xl border">
-                        <span class="block text-[9px] text-slate-400">คงเหลือ</span>
+                    <div class="input-element p-2.5 rounded-2xl border">
+                        <span class="block text-[9px] text-slate-400 font-medium">คงเหลือ</span>
                         <span id="remaining-cal" class="text-base font-extrabold text-sky-400">--</span>
                     </div>
-                    <div class="input-element p-2 rounded-2xl border">
-                        <span class="block text-[9px] text-slate-400">สถานะ</span>
+                    <div class="input-element p-2.5 rounded-2xl border">
+                        <span class="block text-[9px] text-slate-400 font-medium">สถานะ</span>
                         <span id="cal-status-text" class="text-[11px] font-bold text-slate-400">-</span>
                     </div>
                 </div>
             </div>
 
             <!-- มื้อเช้า -->
-            <div class="card-element border rounded-3xl p-4 soft-shadow space-y-3">
+            <div class="card-element border rounded-3xl p-4 art-shadow space-y-3">
                 <div class="flex items-center justify-between">
                     <h3 class="text-xs font-bold flex items-center gap-1.5" style="color: var(--text-main);">
                         <i class="fa-solid fa-sun text-amber-400"></i> มื้อเช้า (Breakfast)
@@ -204,13 +202,13 @@
                     <span id="sum-breakfast" class="text-xs font-bold text-slate-400">0 kcal</span>
                 </div>
                 <div id="container-breakfast" class="space-y-2"></div>
-                <button onclick="addFoodRow('breakfast')" class="w-full py-2 border border-dashed rounded-xl text-xs font-medium text-slate-400 hover:border-emerald-500 active:scale-95 transition">
+                <button onclick="addFoodRow('breakfast')" class="w-full py-2 border border-dashed rounded-xl text-xs font-medium text-slate-400 hover:border-indigo-500 active:scale-95 transition">
                     <i class="fa-solid fa-plus mr-1"></i> เพิ่มเมนูมื้อเช้า
                 </button>
             </div>
 
             <!-- มื้อเที่ยง -->
-            <div class="card-element border rounded-3xl p-4 soft-shadow space-y-3">
+            <div class="card-element border rounded-3xl p-4 art-shadow space-y-3">
                 <div class="flex items-center justify-between">
                     <h3 class="text-xs font-bold flex items-center gap-1.5" style="color: var(--text-main);">
                         <i class="fa-solid fa-cloud-sun text-orange-400"></i> มื้อเที่ยง (Lunch)
@@ -218,13 +216,13 @@
                     <span id="sum-lunch" class="text-xs font-bold text-slate-400">0 kcal</span>
                 </div>
                 <div id="container-lunch" class="space-y-2"></div>
-                <button onclick="addFoodRow('lunch')" class="w-full py-2 border border-dashed rounded-xl text-xs font-medium text-slate-400 hover:border-emerald-500 active:scale-95 transition">
+                <button onclick="addFoodRow('lunch')" class="w-full py-2 border border-dashed rounded-xl text-xs font-medium text-slate-400 hover:border-indigo-500 active:scale-95 transition">
                     <i class="fa-solid fa-plus mr-1"></i> เพิ่มเมนูมื้อเที่ยง
                 </button>
             </div>
 
             <!-- มื้อเย็น -->
-            <div class="card-element border rounded-3xl p-4 soft-shadow space-y-3">
+            <div class="card-element border rounded-3xl p-4 art-shadow space-y-3">
                 <div class="flex items-center justify-between">
                     <h3 class="text-xs font-bold flex items-center gap-1.5" style="color: var(--text-main);">
                         <i class="fa-solid fa-moon text-indigo-400"></i> มื้อเย็น (Dinner)
@@ -232,13 +230,13 @@
                     <span id="sum-dinner" class="text-xs font-bold text-slate-400">0 kcal</span>
                 </div>
                 <div id="container-dinner" class="space-y-2"></div>
-                <button onclick="addFoodRow('dinner')" class="w-full py-2 border border-dashed rounded-xl text-xs font-medium text-slate-400 hover:border-emerald-500 active:scale-95 transition">
+                <button onclick="addFoodRow('dinner')" class="w-full py-2 border border-dashed rounded-xl text-xs font-medium text-slate-400 hover:border-indigo-500 active:scale-95 transition">
                     <i class="fa-solid fa-plus mr-1"></i> เพิ่มเมนูมื้อเย็น
                 </button>
             </div>
 
             <!-- ของว่าง / ระหว่างวัน -->
-            <div class="card-element border rounded-3xl p-4 soft-shadow space-y-3">
+            <div class="card-element border rounded-3xl p-4 art-shadow space-y-3">
                 <div class="flex items-center justify-between">
                     <h3 class="text-xs font-bold flex items-center gap-1.5" style="color: var(--text-main);">
                         <i class="fa-solid fa-cookie-bite text-pink-400"></i> ของว่าง / เครื่องดื่ม (Snacks)
@@ -246,7 +244,7 @@
                     <span id="sum-snack" class="text-xs font-bold text-slate-400">0 kcal</span>
                 </div>
                 <div id="container-snack" class="space-y-2"></div>
-                <button onclick="addFoodRow('snack')" class="w-full py-2 border border-dashed rounded-xl text-xs font-medium text-slate-400 hover:border-emerald-500 active:scale-95 transition">
+                <button onclick="addFoodRow('snack')" class="w-full py-2 border border-dashed rounded-xl text-xs font-medium text-slate-400 hover:border-indigo-500 active:scale-95 transition">
                     <i class="fa-solid fa-plus mr-1"></i> เพิ่มรายการของว่าง
                 </button>
             </div>
@@ -264,38 +262,38 @@
 
         <!-- TAB 2: HEALTH & WEIGHT -->
         <section id="tab-health" class="hidden space-y-4">
-            <div class="card-element border rounded-3xl p-5 soft-shadow space-y-3">
+            <div class="card-element border rounded-3xl p-5 art-shadow space-y-3">
                 <div class="flex items-center justify-between">
                     <h2 class="text-sm font-bold" style="color: var(--text-main);"><i class="fa-solid fa-user-pen mr-1.5" style="color: var(--accent);"></i> ข้อมูลและเป้าหมาย</h2>
                     <button onclick="saveProfileToSheets()" class="px-3 py-1 font-semibold text-xs rounded-xl active:scale-95" style="background-color: var(--accent-light); color: var(--accent);">บันทึกลง Cloud</button>
                 </div>
                 <div class="grid grid-cols-2 gap-2 text-xs">
                     <div>
-                        <label class="text-slate-400 text-[10px]">เพศ</label>
-                        <select id="user-gender" onchange="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2">
+                        <label class="text-slate-400 text-[10px] font-semibold">เพศ</label>
+                        <select id="user-gender" onchange="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2 font-medium">
                             <option value="male">ชาย</option>
                             <option value="female">หญิง</option>
                         </select>
                     </div>
                     <div>
-                        <label class="text-slate-400 text-[10px]">อายุ (ปี)</label>
-                        <input type="number" id="user-age" value="28" oninput="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2">
+                        <label class="text-slate-400 text-[10px] font-semibold">อายุ (ปี)</label>
+                        <input type="number" id="user-age" value="28" oninput="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2 font-medium">
                     </div>
                     <div>
-                        <label class="text-slate-400 text-[10px]">ส่วนสูง (ซม.)</label>
-                        <input type="number" id="user-height" value="170" oninput="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2">
+                        <label class="text-slate-400 text-[10px] font-semibold">ส่วนสูง (ซม.)</label>
+                        <input type="number" id="user-height" value="170" oninput="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2 font-medium">
                     </div>
                     <div>
-                        <label class="text-slate-400 text-[10px]">น้ำหนักเริ่มต้น (กก.)</label>
-                        <input type="number" step="0.1" id="user-weight" value="70" oninput="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2">
+                        <label class="text-slate-400 text-[10px] font-semibold">น้ำหนักเริ่มต้น (กก.)</label>
+                        <input type="number" step="0.1" id="user-weight" value="70" oninput="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2 font-medium">
                     </div>
                     <div>
-                        <label class="text-slate-400 text-[10px]">น้ำหนักเป้าหมาย (กก.)</label>
-                        <input type="number" step="0.1" id="user-target" value="62" oninput="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2">
+                        <label class="text-slate-400 text-[10px] font-semibold">น้ำหนักเป้าหมาย (กก.)</label>
+                        <input type="number" step="0.1" id="user-target" value="62" oninput="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2 font-medium">
                     </div>
                     <div>
-                        <label class="text-slate-400 text-[10px]">เป้าลด/สัปดาห์</label>
-                        <select id="user-loss-rate" onchange="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2 font-medium" style="color: var(--accent);">
+                        <label class="text-slate-400 text-[10px] font-semibold">เป้าลด/สัปดาห์</label>
+                        <select id="user-loss-rate" onchange="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2 font-bold" style="color: var(--accent);">
                             <option value="0.25">0.25 กก. (ชิวๆ)</option>
                             <option value="0.5" selected>0.5 กก. (แนะนำ)</option>
                             <option value="0.75">0.75 กก. (เข้มข้น)</option>
@@ -306,29 +304,29 @@
             </div>
 
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-                <div class="card-element border p-3 rounded-2xl soft-shadow">
-                    <span class="text-[10px] text-slate-400">BMI</span>
+                <div class="card-element border p-3 rounded-2xl art-shadow">
+                    <span class="text-[10px] text-slate-400 font-semibold">BMI</span>
                     <h3 id="bmi-val" class="text-lg font-bold mt-0.5" style="color: var(--accent);">--</h3>
-                    <span id="bmi-status" class="text-[9px] text-slate-400">--</span>
+                    <span id="bmi-status" class="text-[9px] text-slate-400 font-medium">--</span>
                 </div>
-                <div class="card-element border p-3 rounded-2xl soft-shadow">
-                    <span class="text-[10px] text-slate-400">TDEE (พลังงาน/วัน)</span>
+                <div class="card-element border p-3 rounded-2xl art-shadow">
+                    <span class="text-[10px] text-slate-400 font-semibold">TDEE (พลังงาน/วัน)</span>
                     <h3 id="tdee-val" class="text-lg font-bold text-sky-400 mt-0.5">--</h3>
-                    <span class="text-[9px] text-slate-400">kcal/วัน</span>
+                    <span class="text-[9px] text-slate-400 font-medium">kcal/วัน</span>
                 </div>
-                <div class="card-element border p-3 rounded-2xl soft-shadow">
-                    <span class="text-[10px] text-slate-400">เป้าหมายทาน/วัน</span>
+                <div class="card-element border p-3 rounded-2xl art-shadow">
+                    <span class="text-[10px] text-slate-400 font-semibold">เป้าหมายทาน/วัน</span>
                     <h3 id="cal-target-val" class="text-lg font-bold text-amber-400 mt-0.5">--</h3>
-                    <span class="text-[9px] text-slate-400">kcal (เพื่อลดน้ำหนัก)</span>
+                    <span class="text-[9px] text-slate-400 font-medium">kcal (เพื่อลดน้ำหนัก)</span>
                 </div>
-                <div class="card-element border p-3 rounded-2xl soft-shadow">
-                    <span class="text-[10px] text-slate-400">ทานขั้นต่ำสุด/วัน</span>
+                <div class="card-element border p-3 rounded-2xl art-shadow">
+                    <span class="text-[10px] text-slate-400 font-semibold">ทานขั้นต่ำสุด/วัน</span>
                     <h3 id="cal-min-val" class="text-lg font-bold text-rose-400 mt-0.5">--</h3>
-                    <span class="text-[9px] text-rose-400">ห้ามต่ำกว่านี้</span>
+                    <span class="text-[9px] text-rose-400 font-medium">ห้ามต่ำกว่านี้</span>
                 </div>
             </div>
 
-            <div class="card-element border rounded-3xl p-4 soft-shadow space-y-3">
+            <div class="card-element border rounded-3xl p-4 art-shadow space-y-3">
                 <div class="flex items-center justify-between">
                     <h3 class="text-xs font-bold" style="color: var(--text-main);">กราฟการลดน้ำหนัก</h3>
                     <button onclick="openWeightModal()" class="px-3 py-1 text-xs font-bold text-white rounded-xl active:scale-95 shadow-sm" style="background-color: var(--accent);">+ ชั่งน้ำหนัก</button>
@@ -341,7 +339,7 @@
 
         <!-- TAB 3: CALENDAR LOG -->
         <section id="tab-calendar" class="hidden space-y-4">
-            <div class="card-element border rounded-3xl p-5 soft-shadow space-y-4">
+            <div class="card-element border rounded-3xl p-5 art-shadow space-y-4">
                 <div class="flex items-center justify-between">
                     <button onclick="changeMonth(-1)" class="p-2 input-element border rounded-xl text-slate-400 active:scale-95">
                         <i class="fa-solid fa-chevron-left text-xs"></i>
@@ -352,13 +350,13 @@
                     </button>
                 </div>
 
-                <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-semibold text-slate-400">
+                <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-400">
                     <span>อา</span><span>จ</span><span>อ</span><span>พ</span><span>พฤ</span><span>ศ</span><span>ส</span>
                 </div>
 
                 <div id="calendar-grid" class="grid grid-cols-7 gap-1.5"></div>
 
-                <div class="pt-3 border-t border-slate-800/20 flex flex-wrap items-center justify-center gap-3 text-[10px] text-slate-400">
+                <div class="pt-3 border-t border-slate-500/10 flex flex-wrap items-center justify-center gap-3 text-[10px] text-slate-400 font-medium">
                     <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full" style="background-color: var(--accent);"></span><span>ไม่เกินเป้า</span></div>
                     <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span><span>Cheat Day</span></div>
                     <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-400"></span><span>เกินเป้า</span></div>
@@ -369,10 +367,10 @@
     </main>
 
     <!-- Bottom Navigation Bar -->
-    <nav class="fixed bottom-0 inset-x-0 card-element border-t backdrop-blur-lg z-40 px-4 py-2 flex justify-around pb-safe soft-shadow">
+    <nav class="fixed bottom-0 inset-x-0 card-element border-t backdrop-blur-lg z-40 px-4 py-2 flex justify-around pb-safe art-shadow">
         <button onclick="switchTab('timer')" id="nav-timer" class="flex flex-col items-center space-y-1" style="color: var(--accent);">
             <i class="fa-solid fa-utensils text-lg"></i>
-            <span class="text-[10px] font-medium">Calorie Log</span>
+            <span class="text-[10px] font-bold">Calorie Log</span>
         </button>
         <button onclick="switchTab('health')" id="nav-health" class="flex flex-col items-center text-slate-400 space-y-1">
             <i class="fa-solid fa-chart-line text-lg"></i>
@@ -384,33 +382,33 @@
         </button>
     </nav>
 
-    <!-- Modal เลือกธีมสีพาสเทล -->
+    <!-- Modal เลือกธีมสีศิลป์ (Artistic Themes) -->
     <div id="theme-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4 hidden">
-        <div class="card-element border rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm space-y-4 soft-shadow">
+        <div class="card-element border rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm space-y-4 art-shadow">
             <div class="flex items-center justify-between">
-                <h3 class="font-bold text-sm" style="color: var(--text-main);"><i class="fa-solid fa-palette text-amber-400 mr-2"></i>เลือกธีมสีพาสเทล</h3>
+                <h3 class="font-bold text-sm" style="color: var(--text-main);"><i class="fa-solid fa-palette text-indigo-400 mr-2"></i>เลือกชุดสีแนว Art & Modern</h3>
                 <button onclick="closeThemeModal()" class="text-slate-400 hover:text-slate-200 p-1"><i class="fa-solid fa-xmark text-base"></i></button>
             </div>
             <div class="grid grid-cols-1 gap-2.5 text-xs">
                 <button onclick="applyTheme('default')" class="p-3 input-element border rounded-2xl flex items-center justify-between theme-dot">
-                    <span class="font-medium">🌿 Minty Sage (เขียวมินต์พาสเทล)</span>
-                    <span class="w-5 h-5 rounded-full bg-emerald-400 border border-white/20 shadow-sm"></span>
+                    <span class="font-bold">🔮 Modern Indigo (ม่วงคลาสสิกโมเดิร์น)</span>
+                    <span class="w-5 h-5 rounded-full bg-indigo-500 shadow-sm"></span>
                 </button>
-                <button onclick="applyTheme('sakura')" class="p-3 input-element border rounded-2xl flex items-center justify-between theme-dot">
-                    <span class="font-medium">🌸 Sakura Pink (ชมพูพาสเทล)</span>
-                    <span class="w-5 h-5 rounded-full bg-pink-400 border border-white/20 shadow-sm"></span>
+                <button onclick="applyTheme('sunset')" class="p-3 input-element border rounded-2xl flex items-center justify-between theme-dot">
+                    <span class="font-bold">🌅 Rose Sunset (ชมพูพระอาทิตย์ตก)</span>
+                    <span class="w-5 h-5 rounded-full bg-rose-500 shadow-sm"></span>
                 </button>
-                <button onclick="applyTheme('lavender')" class="p-3 input-element border rounded-2xl flex items-center justify-between theme-dot">
-                    <span class="font-medium">🌌 Sweet Lavender (ม่วงพาสเทล)</span>
-                    <span class="w-5 h-5 rounded-full bg-purple-400 border border-white/20 shadow-sm"></span>
+                <button onclick="applyTheme('emerald')" class="p-3 input-element border rounded-2xl flex items-center justify-between theme-dot">
+                    <span class="font-bold">💎 Rich Emerald (เขียวมรกตหรูหรา)</span>
+                    <span class="w-5 h-5 rounded-full bg-emerald-600 shadow-sm"></span>
                 </button>
-                <button onclick="applyTheme('sky')" class="p-3 input-element border rounded-2xl flex items-center justify-between theme-dot">
-                    <span class="font-medium">🌊 Sky Blue (ฟ้าสดใส)</span>
-                    <span class="w-5 h-5 rounded-full bg-sky-400 border border-white/20 shadow-sm"></span>
+                <button onclick="applyTheme('cyberpunk')" class="p-3 input-element border rounded-2xl flex items-center justify-between theme-dot">
+                    <span class="font-bold">⚡ Neon Orchid (นีออนกล้วยไม้)</span>
+                    <span class="w-5 h-5 rounded-full bg-fuchsia-500 shadow-sm"></span>
                 </button>
-                <button onclick="applyTheme('peach')" class="p-3 input-element border rounded-2xl flex items-center justify-between theme-dot">
-                    <span class="font-medium">🍑 Juicy Peach (ส้มพีชพาสเทล)</span>
-                    <span class="w-5 h-5 rounded-full bg-orange-400 border border-white/20 shadow-sm"></span>
+                <button onclick="applyTheme('amber')" class="p-3 input-element border rounded-2xl flex items-center justify-between theme-dot">
+                    <span class="font-bold">🔥 Sunset Amber (ส้มแอมเบอร์อบอุ่น)</span>
+                    <span class="w-5 h-5 rounded-full bg-amber-500 shadow-sm"></span>
                 </button>
             </div>
         </div>
@@ -418,18 +416,18 @@
 
     <!-- Modal Log Weight -->
     <div id="weight-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4 hidden">
-        <div class="card-element border rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm space-y-4 soft-shadow">
+        <div class="card-element border rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm space-y-4 art-shadow">
             <h3 class="font-bold text-sm" style="color: var(--text-main);">บันทึกน้ำหนักวันนี้</h3>
             <div>
-                <label class="text-[10px] text-slate-400">วันที่</label>
-                <input type="date" id="log-date" class="w-full input-element border rounded-xl p-2.5 text-xs">
+                <label class="text-[10px] text-slate-400 font-semibold">วันที่</label>
+                <input type="date" id="log-date" class="w-full input-element border rounded-xl p-2.5 text-xs font-medium">
             </div>
             <div>
-                <label class="text-[10px] text-slate-400">น้ำหนัก (กก.)</label>
-                <input type="number" step="0.1" id="log-weight-val" class="w-full input-element border rounded-xl p-2.5 text-xs">
+                <label class="text-[10px] text-slate-400 font-semibold">น้ำหนัก (กก.)</label>
+                <input type="number" step="0.1" id="log-weight-val" class="w-full input-element border rounded-xl p-2.5 text-xs font-medium">
             </div>
             <div class="flex gap-2">
-                <button onclick="closeWeightModal()" class="w-1/3 py-2.5 input-element border rounded-xl text-xs font-medium">ยกเลิก</button>
+                <button onclick="closeWeightModal()" class="w-1/3 py-2.5 input-element border rounded-xl text-xs font-bold">ยกเลิก</button>
                 <button onclick="saveWeightToSheets()" class="w-2/3 py-2.5 text-white font-bold rounded-xl text-xs shadow-sm" style="background-color: var(--accent);">บันทึกไป Cloud</button>
             </div>
         </div>
@@ -440,8 +438,8 @@
 
         let weightChartInstance = null;
         let profileData = {}, weightLogs = [];
-        let calendarLogs = JSON.parse(localStorage.getItem('cal_mobile_calendar_logs')) || {};
-        let foodLogsData = JSON.parse(localStorage.getItem('cal_mobile_food_logs')) || {};
+        let calendarLogs = JSON.parse(localStorage.getItem('cal_art_calendar_logs')) || {};
+        let foodLogsData = JSON.parse(localStorage.getItem('cal_art_food_logs')) || {};
         let currentMonth = new Date().getMonth(), currentYear = new Date().getFullYear();
 
         window.onload = function() {
@@ -451,7 +449,7 @@
                 document.getElementById('dark-icon').className = 'fa-solid fa-sun text-xs text-amber-300';
             }
 
-            const savedTheme = localStorage.getItem('if_light_pastel_theme') || 'default';
+            const savedTheme = localStorage.getItem('if_art_theme') || 'default';
             applyTheme(savedTheme, false);
 
             initDateInputs();
@@ -473,7 +471,7 @@
             const darkIcon = document.getElementById('dark-icon');
             if (htmlEl.classList.contains('dark')) {
                 htmlEl.classList.remove('dark');
-                darkIcon.className = 'fa-solid fa-moon text-xs text-amber-400';
+                darkIcon.className = 'fa-solid fa-moon text-xs text-amber-500';
                 localStorage.setItem('if_dark_mode', 'false');
             } else {
                 htmlEl.classList.add('dark');
@@ -491,7 +489,7 @@
             const htmlEl = document.documentElement;
             if (themeName === 'default') htmlEl.removeAttribute('data-theme');
             else htmlEl.setAttribute('data-theme', themeName);
-            localStorage.setItem('if_light_pastel_theme', themeName);
+            localStorage.setItem('if_art_theme', themeName);
             if (weightChartInstance) initOrUpdateChart();
             closeThemeModal();
         }
@@ -586,8 +584,8 @@
             const row = document.createElement('div');
             row.className = 'flex items-center gap-2 food-row';
             row.innerHTML = `
-                <input type="text" placeholder="ชื่อเมนูอาหาร" value="${nameVal}" class="w-7/12 input-element border rounded-xl p-2 text-xs food-name">
-                <input type="number" placeholder="kcal" value="${calVal}" oninput="calculateTotalCalories()" class="w-3/12 input-element border rounded-xl p-2 text-xs food-cal text-center">
+                <input type="text" placeholder="ชื่อเมนูอาหาร" value="${nameVal}" class="w-7/12 input-element border rounded-xl p-2 text-xs font-medium food-name">
+                <input type="number" placeholder="kcal" value="${calVal}" oninput="calculateTotalCalories()" class="w-3/12 input-element border rounded-xl p-2 text-xs font-bold food-cal text-center">
                 <button onclick="removeFoodRow(this)" class="w-2/12 p-2 text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs active:scale-95"><i class="fa-solid fa-trash-can"></i></button>
             `;
             container.appendChild(row);
@@ -606,20 +604,16 @@
             calculateTotalCalories();
         }
 
-        // --- ฟังก์ชันเคลียร์ข้อมูลของวันที่เลือก ---
         function clearDayLogs() {
             if (!confirm("คุณต้องการล้างรายการอาหารทั้งหมดของวันนี้ใช่หรือไม่?")) return;
             const dateKey = document.getElementById('cal-log-date').value;
 
-            // ลบข้อมูลอาหารในหน่วยความจำ
             delete foodLogsData[dateKey];
-            localStorage.setItem('cal_mobile_food_logs', JSON.stringify(foodLogsData));
+            localStorage.setItem('cal_art_food_logs', JSON.stringify(foodLogsData));
 
-            // ลบสถานะในปฏิทินของวันนี้ออกด้วย
             delete calendarLogs[dateKey];
-            localStorage.setItem('cal_mobile_calendar_logs', JSON.stringify(calendarLogs));
+            localStorage.setItem('cal_art_calendar_logs', JSON.stringify(calendarLogs));
 
-            // รีเฟรชหน้าจอฟอร์มอาหารและปฏิทิน
             loadDailyFoodLogs();
             renderCalendar();
             alert("เคลียร์ข้อมูลของวันนี้เรียบร้อยแล้วครับ");
@@ -677,7 +671,7 @@
             });
 
             foodLogsData[dateKey] = dayData;
-            localStorage.setItem('cal_mobile_food_logs', JSON.stringify(foodLogsData));
+            localStorage.setItem('cal_art_food_logs', JSON.stringify(foodLogsData));
 
             const targetCal = Number(document.getElementById('cal-target-val').innerText.replace(/,/g, '')) || 2000;
             const totalConsumed = Number(document.getElementById('total-consumed-cal').innerText.replace(/,/g, '')) || 0;
@@ -693,7 +687,7 @@
             }
 
             calendarLogs[dateKey] = { status, note };
-            localStorage.setItem('cal_mobile_calendar_logs', JSON.stringify(calendarLogs));
+            localStorage.setItem('cal_art_calendar_logs', JSON.stringify(calendarLogs));
 
             alert("บันทึกรายการอาหารและอัปเดตปฏิทินเรียบร้อยแล้ว!");
             renderCalendar();
@@ -769,7 +763,7 @@
             const labels = cleanLogs.map(l => l.date);
             const data = cleanLogs.map(l => l.weight);
             const targetData = cleanLogs.map(() => Number(document.getElementById('user-target').value) || 62);
-            const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#10b981';
+            const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#6366f1';
             const isDark = document.documentElement.classList.contains('dark');
 
             if (weightChartInstance) weightChartInstance.destroy();
@@ -779,8 +773,8 @@
                 data: {
                     labels,
                     datasets: [
-                        { label: 'Weight', data, borderColor: accentColor, borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: accentColor, tension: 0.2 },
-                        { label: 'Target', data: targetData, borderColor: '#f59e0b', borderDash: [4,4], borderWidth: 1.5, pointRadius: 0 }
+                        { label: 'Weight', data, borderColor: accentColor, borderWidth: 3, pointRadius: 4, pointBackgroundColor: accentColor, tension: 0.25 },
+                        { label: 'Target', data: targetData, borderColor: '#f59e0b', borderDash: [4,4], borderWidth: 2, pointRadius: 0 }
                     ]
                 },
                 options: {
@@ -788,8 +782,8 @@
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        x: { ticks: { color: isDark ? '#64748b' : '#94a3b8', font: { size: 9 } }, grid: { display: false } },
-                        y: { ticks: { color: isDark ? '#64748b' : '#94a3b8', font: { size: 9 } }, grid: { color: isDark ? '#1e293b' : '#f1f5f9' } }
+                        x: { ticks: { color: isDark ? '#94a3b8' : '#64748b', font: { size: 9, weight: '600' } }, grid: { display: false } },
+                        y: { ticks: { color: isDark ? '#94a3b8' : '#64748b', font: { size: 9, weight: '600' } }, grid: { color: isDark ? '#22304c' : '#f1f5f9' } }
                     }
                 }
             });
@@ -818,18 +812,18 @@
             for (let d = 1; d <= totalDays; d++) {
                 const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                 const log = calendarLogs[dateKey];
-                let bg = isDark ? 'input-element border text-slate-300' : 'bg-slate-50 border-slate-100 text-slate-600';
+                let bg = isDark ? 'input-element border text-slate-300' : 'bg-slate-100/70 border-slate-200 text-slate-700';
                 
                 if (log) {
-                    if (log.status === 'Success') bg = isDark ? 'bg-emerald-900/35 border-emerald-500/40 text-emerald-400' : 'bg-emerald-100 border-emerald-200 text-emerald-700';
-                    else if (log.status === 'Partial') bg = isDark ? 'bg-amber-900/35 border-amber-500/40 text-amber-400' : 'bg-amber-100 border-amber-200 text-amber-700';
-                    else if (log.status === 'Missed') bg = isDark ? 'bg-rose-900/35 border-rose-500/40 text-rose-400' : 'bg-rose-100 border-rose-200 text-rose-700';
+                    if (log.status === 'Success') bg = isDark ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-400' : 'bg-emerald-100 border-emerald-300 text-emerald-800 font-bold';
+                    else if (log.status === 'Partial') bg = isDark ? 'bg-amber-950/40 border-amber-500/40 text-amber-400' : 'bg-amber-100 border-amber-300 text-amber-800 font-bold';
+                    else if (log.status === 'Missed') bg = isDark ? 'bg-rose-950/40 border-rose-500/40 text-rose-400' : 'bg-rose-100 border-rose-300 text-rose-800 font-bold';
                 }
 
                 html += `
-                    <div onclick="jumpToDate('${dateKey}')" class="aspect-square rounded-xl border ${bg} p-1 flex flex-col justify-between items-center cursor-pointer active:scale-95 transition">
+                    <div onclick="jumpToDate('${dateKey}')" class="aspect-square rounded-2xl border ${bg} p-1 flex flex-col justify-between items-center cursor-pointer active:scale-95 transition shadow-sm">
                         <span class="text-[11px] font-bold">${d}</span>
-                        <span class="text-[8px] truncate font-medium">${log ? log.status.slice(0,4) : ''}</span>
+                        <span class="text-[8px] truncate font-semibold">${log ? log.status.slice(0,4) : ''}</span>
                     </div>`;
             }
             grid.innerHTML = html;
@@ -845,9 +839,11 @@
             ['timer', 'health', 'calendar'].forEach(tab => {
                 document.getElementById(`tab-${tab}`).classList.add('hidden');
                 document.getElementById(`nav-${tab}`).style.color = '#94a3b8';
+                document.getElementById(`nav-${tab}`).querySelector('span').className = 'text-[10px] font-medium';
             });
             document.getElementById(`tab-${t}`).classList.remove('hidden');
             document.getElementById(`nav-${t}`).style.color = 'var(--accent)';
+            document.getElementById(`nav-${t}`).querySelector('span').className = 'text-[10px] font-bold';
             if (t === 'calendar') renderCalendar();
         }
 
