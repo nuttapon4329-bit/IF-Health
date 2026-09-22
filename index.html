@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>IF & Health Mobile App (Soft Dark Edition)</title>
+    <title>IF & Health Mobile App (Cloud Sync Edition)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -124,7 +124,7 @@
     <!-- Loading Overlay -->
     <div id="loading-overlay" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md z-50 flex flex-col items-center justify-center text-indigo-500 hidden">
         <i class="fa-solid fa-circle-notch fa-spin text-3xl mb-2" style="color: var(--accent);"></i>
-        <span class="text-xs font-medium text-slate-300">กำลังซิงค์ข้อมูล...</span>
+        <span class="text-xs font-medium text-slate-300">กำลังซิงค์ข้อมูลกับ Google Sheets...</span>
     </div>
 
     <!-- Header -->
@@ -135,7 +135,7 @@
             </div>
             <div>
                 <h1 class="font-bold text-base tracking-tight leading-none" style="color: var(--text-main);">Cal & Health Art</h1>
-                <span class="text-[10px] font-semibold uppercase tracking-wider" style="color: var(--accent);">Soft Dark Edition</span>
+                <span class="text-[10px] font-semibold uppercase tracking-wider" style="color: var(--accent);">Cloud Sync Edition</span>
             </div>
         </div>
         
@@ -146,7 +146,7 @@
             <button onclick="openThemeModal()" class="p-2.5 input-element rounded-2xl active:scale-95 transition" title="เลือกธีมสีอาร์ตๆ">
                 <i class="fa-solid fa-palette text-xs" style="color: var(--accent);"></i>
             </button>
-            <button onclick="fetchDataFromSheets()" class="p-2.5 input-element rounded-2xl text-slate-400 active:scale-95 transition" title="รีเฟรช">
+            <button onclick="fetchDataFromSheets()" class="p-2.5 input-element rounded-2xl text-slate-400 active:scale-95 transition" title="รีเฟรชข้อมูลจากชีท">
                 <i class="fa-solid fa-arrows-rotate text-xs"></i>
             </button>
         </div>
@@ -249,7 +249,7 @@
                 <button onclick="clearDayLogs()" class="w-1/3 py-3 font-bold rounded-2xl text-xs border border-rose-500/30 text-rose-400 bg-rose-500/10 active:scale-95 transition">
                     <i class="fa-solid fa-trash-can mr-1"></i> เคลียร์วันนี้
                 </button>
-                <button onclick="saveFoodLogsToLocal()" class="w-2/3 py-3 font-bold rounded-2xl text-sm shadow-md active:scale-95 transition text-white" style="background-color: var(--accent);">
+                <button onclick="saveFoodLogsToCloud()" class="w-2/3 py-3 font-bold rounded-2xl text-sm shadow-md active:scale-95 transition text-white" style="background-color: var(--accent);">
                     <i class="fa-solid fa-floppy-disk mr-1.5"></i> บันทึกข้อมูลอาหารวันนี้
                 </button>
             </div>
@@ -353,8 +353,8 @@
 
                 <div class="pt-3 border-t border-slate-500/10 flex flex-wrap items-center justify-center gap-3 text-[10px] text-slate-400 font-medium">
                     <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full" style="background-color: var(--accent);"></span><span>ไม่เกินเป้า</span></div>
-                    <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span><span>Cheat Day</span></div>
-                    <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-400"></span><span>เกินเป้า</span></div>
+                    <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span><span>เกินเป้าเล็กน้อย</span></div>
+                    <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-400"></span><span>เกินเป้ามาก</span></div>
                 </div>
             </div>
         </section>
@@ -437,18 +437,10 @@
         let foodLogsData = {};
         let currentMonth = new Date().getMonth(), currentYear = new Date().getFullYear();
 
-        window.onload = function() {
-            const isDark = localStorage.getItem('if_dark_mode') === 'true';
-            if (isDark) {
-                document.documentElement.classList.add('dark');
-                document.getElementById('dark-icon').className = 'fa-solid fa-sun text-xs text-amber-300';
-            }
-
-            const savedTheme = localStorage.getItem('if_art_theme') || 'default';
-            applyTheme(savedTheme, false);
-
+        window.onload = async function() {
+            // โหลดค่าธีมและโหมดมืดจาก Google Sheets (เก็บบนคลาวด์ทั้งหมด)
             initDateInputs();
-            fetchDataFromSheets();
+            await fetchDataFromSheets();
         };
 
         function initDateInputs() {
@@ -459,31 +451,56 @@
             document.getElementById('cal-log-date').value = `${year}-${month}-${day}`;
         }
 
-        function toggleDarkMode() {
+        async function toggleDarkMode() {
             const htmlEl = document.documentElement;
-            const darkIcon = document.getElementById('dark-icon');
-            if (htmlEl.classList.contains('dark')) {
-                htmlEl.classList.remove('dark');
-                darkIcon.className = 'fa-solid fa-moon text-xs text-amber-500';
-                localStorage.setItem('if_dark_mode', 'false');
-            } else {
+            const isDarkNow = htmlEl.classList.contains('dark');
+            const newDarkMode = !isDarkNow;
+            
+            if (newDarkMode) {
                 htmlEl.classList.add('dark');
-                darkIcon.className = 'fa-solid fa-sun text-xs text-amber-300';
-                localStorage.setItem('if_dark_mode', 'true');
+                document.getElementById('dark-icon').className = 'fa-solid fa-sun text-xs text-amber-300';
+            } else {
+                htmlEl.classList.remove('dark');
+                document.getElementById('dark-icon').className = 'fa-solid fa-moon text-xs text-amber-500';
             }
+            
+            profileData.darkMode = newDarkMode;
+            await saveSettingsToCloud();
             if (weightChartInstance) initOrUpdateChart();
         }
 
         function openThemeModal() { document.getElementById('theme-modal').classList.remove('hidden'); }
         function closeThemeModal() { document.getElementById('theme-modal').classList.add('hidden'); }
 
-        function applyTheme(themeName) {
+        async function applyTheme(themeName) {
             const htmlEl = document.documentElement;
             if (themeName === 'default') htmlEl.removeAttribute('data-theme');
             else htmlEl.setAttribute('data-theme', themeName);
-            localStorage.setItem('if_art_theme', themeName);
+            
+            profileData.theme = themeName;
+            await saveSettingsToCloud();
             if (weightChartInstance) initOrUpdateChart();
             closeThemeModal();
+        }
+
+        async function saveSettingsToCloud() {
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        action: "saveProfile",
+                        gender: profileData.gender || document.getElementById('user-gender').value,
+                        age: profileData.age || Number(document.getElementById('user-age').value),
+                        height: profileData.height || Number(document.getElementById('user-height').value),
+                        weight: profileData.weight || Number(document.getElementById('user-weight').value),
+                        targetWeight: profileData.targetWeight || Number(document.getElementById('user-target').value),
+                        theme: profileData.theme || 'default',
+                        darkMode: !!profileData.darkMode
+                    })
+                });
+            } catch(e) {
+                console.error("Failed to sync settings", e);
+            }
         }
 
         async function fetchDataFromSheets() {
@@ -501,6 +518,7 @@
                 const resCal = await fetch(`${GOOGLE_SCRIPT_URL}?action=getCalendarLogs`);
                 calendarLogs = await resCal.json();
 
+                applyCloudSettings();
                 updateUIProfile();
                 calculateHealthMetrics();
                 initOrUpdateChart();
@@ -514,22 +532,45 @@
             }
         }
 
+        function applyCloudSettings() {
+            const htmlEl = document.documentElement;
+            if (profileData.darkMode) {
+                htmlEl.classList.add('dark');
+                document.getElementById('dark-icon').className = 'fa-solid fa-sun text-xs text-amber-300';
+            } else {
+                htmlEl.classList.remove('dark');
+                document.getElementById('dark-icon').className = 'fa-solid fa-moon text-xs text-amber-500';
+            }
+
+            const themeName = profileData.theme || 'default';
+            if (themeName === 'default') htmlEl.removeAttribute('data-theme');
+            else htmlEl.setAttribute('data-theme', themeName);
+        }
+
         async function saveProfileToSheets() {
             showLoading(true);
+            profileData.gender = document.getElementById('user-gender').value;
+            profileData.age = Number(document.getElementById('user-age').value);
+            profileData.height = Number(document.getElementById('user-height').value);
+            profileData.weight = Number(document.getElementById('user-weight').value);
+            profileData.targetWeight = Number(document.getElementById('user-target').value);
+
             const payload = {
                 action: "saveProfile",
-                gender: document.getElementById('user-gender').value,
-                age: Number(document.getElementById('user-age').value),
-                height: Number(document.getElementById('user-height').value),
-                weight: Number(document.getElementById('user-weight').value),
-                targetWeight: Number(document.getElementById('user-target').value)
+                gender: profileData.gender,
+                age: profileData.age,
+                height: profileData.height,
+                weight: profileData.weight,
+                targetWeight: profileData.targetWeight,
+                theme: profileData.theme || 'default',
+                darkMode: !!profileData.darkMode
             };
+
             try {
                 await fetch(GOOGLE_SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
-                profileData = payload;
                 updateUIProfile();
                 calculateHealthMetrics();
-                alert("บันทึกข้อมูลเรียบร้อยแล้ว!");
+                alert("บันทึกข้อมูลลง Google Sheets เรียบร้อยแล้ว!");
             } catch(e) {
                 alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
             } finally {
@@ -657,7 +698,7 @@
             }
         }
 
-        async function saveFoodLogsToLocal() {
+        async function saveFoodLogsToCloud() {
             const dateKey = document.getElementById('cal-log-date').value;
             const dayData = { breakfast: [], lunch: [], dinner: [], snack: [] };
 
