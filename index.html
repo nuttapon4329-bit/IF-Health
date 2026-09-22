@@ -28,7 +28,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            /* Theme 1: Minty Sage (Default) */
             --bg-main: #f4f8f5;
             --bg-card: #ffffff;
             --bg-input: #f8fafc;
@@ -41,7 +40,6 @@
         }
 
         [data-theme="sakura"] {
-            /* Theme 2: Sakura Pink */
             --bg-main: #fdf2f8;
             --bg-card: #ffffff;
             --bg-input: #fdf2f8;
@@ -54,7 +52,6 @@
         }
 
         [data-theme="lavender"] {
-            /* Theme 3: Sweet Lavender */
             --bg-main: #faf5ff;
             --bg-card: #ffffff;
             --bg-input: #faf5ff;
@@ -67,7 +64,6 @@
         }
 
         [data-theme="sky"] {
-            /* Theme 4: Sky Blue */
             --bg-main: #f0f9ff;
             --bg-card: #ffffff;
             --bg-input: #f0f9ff;
@@ -80,7 +76,6 @@
         }
 
         [data-theme="peach"] {
-            /* Theme 5: Juicy Peach */
             --bg-main: #fff7ed;
             --bg-card: #ffffff;
             --bg-input: #fff7ed;
@@ -92,7 +87,6 @@
             --ring-color: #f97316;
         }
 
-        /* Dark Mode Colors (สลับสีพื้นหลังให้เข้มขึ้น แต่คงสี Accent พาสเทลไว้) */
         html.dark {
             --bg-main: #0b0f17;
             --bg-card: #151c28;
@@ -123,12 +117,6 @@
             color: var(--text-main);
         }
 
-        .progress-ring__circle {
-            transition: stroke-dashoffset 0.3s ease-in-out;
-            transform: rotate(-90deg);
-            transform-origin: 50% 50%;
-        }
-
         .pb-safe { padding-bottom: env(safe-area-inset-bottom, 5rem); }
         .soft-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03); }
         .theme-dot { transition: transform 0.2s; }
@@ -138,34 +126,31 @@
 <body class="min-h-screen flex flex-col justify-between pb-20 select-none">
 
     <!-- Loading Overlay -->
-    <div id="loading-overlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex flex-col items-center justify-center text-emerald-500">
+    <div id="loading-overlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex flex-col items-center justify-center text-emerald-500 hidden">
         <i class="fa-solid fa-circle-notch fa-spin text-3xl mb-2" style="color: var(--accent);"></i>
-        <span class="text-xs font-medium text-slate-300">กำลังเชื่อมต่อ Google Sheets...</span>
+        <span class="text-xs font-medium text-slate-300">กำลังซิงค์ข้อมูล...</span>
     </div>
 
     <!-- Header -->
     <header class="px-5 py-3.5 card-element border-b sticky top-0 backdrop-blur-md z-40 flex items-center justify-between soft-shadow">
         <div class="flex items-center space-x-2.5">
             <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background-color: var(--accent-light);">
-                <i class="fa-solid fa-heart-pulse text-base" style="color: var(--accent);"></i>
+                <i class="fa-solid fa-utensils text-base" style="color: var(--accent);"></i>
             </div>
             <div>
-                <h1 class="font-bold text-base tracking-tight leading-none" style="color: var(--text-main);">IF Health Pro</h1>
+                <h1 class="font-bold text-base tracking-tight leading-none" style="color: var(--text-main);">Cal & Health Pro</h1>
                 <span class="text-[10px] font-medium" style="color: var(--accent);">Pastel Edition</span>
             </div>
         </div>
         
         <div class="flex items-center gap-1.5">
-            <!-- ปุ่มสลับ Dark Mode -->
             <button onclick="toggleDarkMode()" class="p-2.5 input-element rounded-xl active:scale-95 transition" title="สลับโหมดมืด/สว่าง">
                 <i id="dark-icon" class="fa-solid fa-moon text-xs text-amber-400"></i>
             </button>
-            <!-- ปุ่มเลือกธีม -->
             <button onclick="openThemeModal()" class="p-2.5 input-element rounded-xl active:scale-95 transition" title="เลือกธีมพาสเทล">
                 <i class="fa-solid fa-palette text-xs" style="color: var(--accent);"></i>
             </button>
-            <!-- ปุ่มรีเฟรช -->
-            <button onclick="fetchDataFromSheets()" class="p-2.5 input-element rounded-xl text-slate-400 active:scale-95 transition">
+            <button onclick="fetchDataFromSheets()" class="p-2.5 input-element rounded-xl text-slate-400 active:scale-95 transition" title="รีเฟรช">
                 <i class="fa-solid fa-arrows-rotate text-xs"></i>
             </button>
         </div>
@@ -174,55 +159,111 @@
     <!-- Main Content Container -->
     <main class="px-4 py-4 max-w-md mx-auto w-full flex-grow space-y-5">
 
-        <!-- TAB 1: TIMER -->
+        <!-- TAB 1: CALORIE TRACKER -->
         <section id="tab-timer" class="space-y-4">
-            <div class="grid grid-cols-4 gap-1.5 p-1.5 rounded-2xl card-element soft-shadow border">
-                <button onclick="setProtocol(16)" id="p-16" class="py-2 text-xs font-semibold rounded-xl" style="background-color: var(--accent-light); color: var(--accent);">16/8</button>
-                <button onclick="setProtocol(14)" id="p-14" class="py-2 text-xs font-semibold rounded-xl text-slate-400 hover:text-slate-200">14/10</button>
-                <button onclick="setProtocol(12)" id="p-12" class="py-2 text-xs font-semibold rounded-xl text-slate-400 hover:text-slate-200">12/12</button>
-                <button onclick="setProtocol(20)" id="p-20" class="py-2 text-xs font-semibold rounded-xl text-slate-400 hover:text-slate-200">20/4</button>
+            <!-- วันที่ น้ำหนักปัจจุบัน และเป้าหมายแคลอรี -->
+            <div class="card-element border rounded-3xl p-5 soft-shadow space-y-3">
+                <div class="flex items-center justify-between border-b border-slate-500/10 pb-3">
+                    <div>
+                        <span class="text-[10px] text-slate-400 uppercase font-semibold">วันที่บันทึก</span>
+                        <input type="date" id="cal-log-date" onchange="loadDailyFoodLogs()" class="bg-transparent text-xs font-semibold focus:outline-none block mt-0.5" style="color: var(--accent);">
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] text-slate-400 uppercase font-semibold">น้ำหนักปัจจุบันอ้างอิง</span>
+                        <div class="text-xs font-bold mt-0.5" style="color: var(--text-main);"><span id="current-weight-display">--</span> กก.</div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] text-slate-400 uppercase font-semibold">เป้าหมาย (Kcal)</span>
+                        <div id="target-cal-display" class="text-xs font-bold text-amber-400 mt-0.5">--</div>
+                    </div>
+                </div>
+
+                <!-- สรุปแคลอรีภาพรวม -->
+                <div class="grid grid-cols-3 gap-2 text-center pt-1">
+                    <div class="input-element p-2 rounded-2xl border">
+                        <span class="block text-[9px] text-slate-400">ทานไปแล้ว</span>
+                        <span id="total-consumed-cal" class="text-base font-extrabold" style="color: var(--accent);">0</span>
+                    </div>
+                    <div class="input-element p-2 rounded-2xl border">
+                        <span class="block text-[9px] text-slate-400">คงเหลือ</span>
+                        <span id="remaining-cal" class="text-base font-extrabold text-sky-400">--</span>
+                    </div>
+                    <div class="input-element p-2 rounded-2xl border">
+                        <span class="block text-[9px] text-slate-400">สถานะ</span>
+                        <span id="cal-status-text" class="text-[11px] font-bold text-slate-400">-</span>
+                    </div>
+                </div>
             </div>
 
-            <div class="card-element border rounded-3xl p-6 text-center flex flex-col items-center relative overflow-hidden soft-shadow">
-                <div class="w-full input-element p-2.5 rounded-2xl mb-4 flex items-center justify-between text-left">
-                    <div>
-                        <div class="text-[10px] text-slate-400 uppercase font-semibold">เวลาเริ่มต้น IF</div>
-                        <input type="datetime-local" id="custom-start-time" class="bg-transparent text-xs font-semibold focus:outline-none" style="color: var(--accent);">
-                    </div>
-                    <button onclick="setCurrentTimeInput()" class="px-2.5 py-1.5 card-element border text-[10px] rounded-lg text-slate-400 font-medium active:scale-95">ปัจจุบัน</button>
+            <!-- มื้อเช้า -->
+            <div class="card-element border rounded-3xl p-4 soft-shadow space-y-3">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-bold flex items-center gap-1.5" style="color: var(--text-main);">
+                        <i class="fa-solid fa-sun text-amber-400"></i> มื้อเช้า (Breakfast)
+                    </h3>
+                    <span id="sum-breakfast" class="text-xs font-bold text-slate-400">0 kcal</span>
                 </div>
+                <div id="container-breakfast" class="space-y-2"></div>
+                <button onclick="addFoodRow('breakfast')" class="w-full py-2 border border-dashed rounded-xl text-xs font-medium text-slate-400 hover:border-emerald-500 active:scale-95 transition">
+                    <i class="fa-solid fa-plus mr-1"></i> เพิ่มเมนูมื้อเช้า
+                </button>
+            </div>
 
-                <div class="relative w-56 h-56 flex items-center justify-center my-1">
-                    <svg class="w-full h-full" viewBox="0 0 100 100">
-                        <circle cx="50" cy="50" r="42" fill="none" stroke="var(--border-color)" stroke-width="7"></circle>
-                        <circle id="progress-circle" cx="50" cy="50" r="42" fill="none" stroke="var(--ring-color)" stroke-width="7" stroke-dasharray="263.89" stroke-dashoffset="263.89" stroke-linecap="round" class="progress-ring__circle"></circle>
-                    </svg>
-                    <div class="absolute inset-0 flex flex-col items-center justify-center">
-                        <span id="timer-display" class="text-3xl font-extrabold tracking-tight" style="color: var(--text-main);">00:00:00</span>
-                        <span id="timer-label" class="text-[10px] text-slate-400 uppercase tracking-widest mt-1">เวลาที่ผ่านไป</span>
-                    </div>
+            <!-- มื้อเที่ยง -->
+            <div class="card-element border rounded-3xl p-4 soft-shadow space-y-3">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-bold flex items-center gap-1.5" style="color: var(--text-main);">
+                        <i class="fa-solid fa-cloud-sun text-orange-400"></i> มื้อเที่ยง (Lunch)
+                    </h3>
+                    <span id="sum-lunch" class="text-xs font-bold text-slate-400">0 kcal</span>
                 </div>
+                <div id="container-lunch" class="space-y-2"></div>
+                <button onclick="addFoodRow('lunch')" class="w-full py-2 border border-dashed rounded-xl text-xs font-medium text-slate-400 hover:border-emerald-500 active:scale-95 transition">
+                    <i class="fa-solid fa-plus mr-1"></i> เพิ่มเมนูมื้อเที่ยง
+                </button>
+            </div>
 
-                <div class="grid grid-cols-2 gap-2 w-full mt-4 text-xs">
-                    <div class="input-element p-2.5 rounded-xl border">
-                        <span class="block text-[9px] text-slate-400">เริ่มเวลา</span>
-                        <span id="start-disp" class="font-bold">--:--</span>
-                    </div>
-                    <div class="input-element p-2.5 rounded-xl border">
-                        <span class="block text-[9px] text-slate-400">เป้าหมายจบ</span>
-                        <span id="target-disp" class="font-bold">--:--</span>
-                    </div>
+            <!-- มื้อเย็น -->
+            <div class="card-element border rounded-3xl p-4 soft-shadow space-y-3">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-bold flex items-center gap-1.5" style="color: var(--text-main);">
+                        <i class="fa-solid fa-moon text-indigo-400"></i> มื้อเย็น (Dinner)
+                    </h3>
+                    <span id="sum-dinner" class="text-xs font-bold text-slate-400">0 kcal</span>
                 </div>
+                <div id="container-dinner" class="space-y-2"></div>
+                <button onclick="addFoodRow('dinner')" class="w-full py-2 border border-dashed rounded-xl text-xs font-medium text-slate-400 hover:border-emerald-500 active:scale-95 transition">
+                    <i class="fa-solid fa-plus mr-1"></i> เพิ่มเมนูมื้อเย็น
+                </button>
+            </div>
 
-                <button id="btn-toggle-fast" onclick="toggleFast()" class="w-full mt-5 py-3.5 font-bold rounded-2xl text-sm shadow-md active:scale-95 transition text-white" style="background-color: var(--accent);">
-                    เริ่มอดอาหาร (Start Fasting)
+            <!-- ของว่าง / ระหว่างวัน -->
+            <div class="card-element border rounded-3xl p-4 soft-shadow space-y-3">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-bold flex items-center gap-1.5" style="color: var(--text-main);">
+                        <i class="fa-solid fa-cookie-bite text-pink-400"></i> ของว่าง / เครื่องดื่ม (Snacks)
+                    </h3>
+                    <span id="sum-snack" class="text-xs font-bold text-slate-400">0 kcal</span>
+                </div>
+                <div id="container-snack" class="space-y-2"></div>
+                <button onclick="addFoodRow('snack')" class="w-full py-2 border border-dashed rounded-xl text-xs font-medium text-slate-400 hover:border-emerald-500 active:scale-95 transition">
+                    <i class="fa-solid fa-plus mr-1"></i> เพิ่มรายการของว่าง
+                </button>
+            </div>
+
+            <!-- ปุ่มบันทึกและปุ่มเคลียร์ข้อมูล -->
+            <div class="flex gap-2 pt-2">
+                <button onclick="clearDayLogs()" class="w-1/3 py-3 font-bold rounded-2xl text-xs border border-rose-500/30 text-rose-400 bg-rose-500/10 active:scale-95 transition">
+                    <i class="fa-solid fa-trash-can mr-1"></i> เคลียร์วันนี้
+                </button>
+                <button onclick="saveFoodLogsToLocal()" class="w-2/3 py-3 font-bold rounded-2xl text-sm shadow-md active:scale-95 transition text-white" style="background-color: var(--accent);">
+                    <i class="fa-solid fa-floppy-disk mr-1.5"></i> บันทึกข้อมูลอาหารวันนี้
                 </button>
             </div>
         </section>
 
         <!-- TAB 2: HEALTH & WEIGHT -->
         <section id="tab-health" class="hidden space-y-4">
-            <!-- Profile Form & Settings -->
             <div class="card-element border rounded-3xl p-5 soft-shadow space-y-3">
                 <div class="flex items-center justify-between">
                     <h2 class="text-sm font-bold" style="color: var(--text-main);"><i class="fa-solid fa-user-pen mr-1.5" style="color: var(--accent);"></i> ข้อมูลและเป้าหมาย</h2>
@@ -264,7 +305,6 @@
                 </div>
             </div>
 
-            <!-- Enhanced Metrics Cards -->
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
                 <div class="card-element border p-3 rounded-2xl soft-shadow">
                     <span class="text-[10px] text-slate-400">BMI</span>
@@ -272,7 +312,7 @@
                     <span id="bmi-status" class="text-[9px] text-slate-400">--</span>
                 </div>
                 <div class="card-element border p-3 rounded-2xl soft-shadow">
-                    <span class="text-[10px] text-slate-400">TDEE (ใช้พลังงาน/วัน)</span>
+                    <span class="text-[10px] text-slate-400">TDEE (พลังงาน/วัน)</span>
                     <h3 id="tdee-val" class="text-lg font-bold text-sky-400 mt-0.5">--</h3>
                     <span class="text-[9px] text-slate-400">kcal/วัน</span>
                 </div>
@@ -288,7 +328,6 @@
                 </div>
             </div>
 
-            <!-- Weight Progress Chart -->
             <div class="card-element border rounded-3xl p-4 soft-shadow space-y-3">
                 <div class="flex items-center justify-between">
                     <h3 class="text-xs font-bold" style="color: var(--text-main);">กราฟการลดน้ำหนัก</h3>
@@ -320,10 +359,9 @@
                 <div id="calendar-grid" class="grid grid-cols-7 gap-1.5"></div>
 
                 <div class="pt-3 border-t border-slate-800/20 flex flex-wrap items-center justify-center gap-3 text-[10px] text-slate-400">
-                    <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full" style="background-color: var(--accent);"></span><span>สำเร็จ</span></div>
-                    <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span><span>ชาบู/Cheat</span></div>
-                    <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-sky-400"></span><span>บางส่วน</span></div>
-                    <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-400"></span><span>ไม่สำเร็จ</span></div>
+                    <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full" style="background-color: var(--accent);"></span><span>ไม่เกินเป้า</span></div>
+                    <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span><span>Cheat Day</span></div>
+                    <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-400"></span><span>เกินเป้า</span></div>
                 </div>
             </div>
         </section>
@@ -333,8 +371,8 @@
     <!-- Bottom Navigation Bar -->
     <nav class="fixed bottom-0 inset-x-0 card-element border-t backdrop-blur-lg z-40 px-4 py-2 flex justify-around pb-safe soft-shadow">
         <button onclick="switchTab('timer')" id="nav-timer" class="flex flex-col items-center space-y-1" style="color: var(--accent);">
-            <i class="fa-solid fa-stopwatch text-lg"></i>
-            <span class="text-[10px] font-medium">Timer</span>
+            <i class="fa-solid fa-utensils text-lg"></i>
+            <span class="text-[10px] font-medium">Calorie Log</span>
         </button>
         <button onclick="switchTab('health')" id="nav-health" class="flex flex-col items-center text-slate-400 space-y-1">
             <i class="fa-solid fa-chart-line text-lg"></i>
@@ -353,7 +391,6 @@
                 <h3 class="font-bold text-sm" style="color: var(--text-main);"><i class="fa-solid fa-palette text-amber-400 mr-2"></i>เลือกธีมสีพาสเทล</h3>
                 <button onclick="closeThemeModal()" class="text-slate-400 hover:text-slate-200 p-1"><i class="fa-solid fa-xmark text-base"></i></button>
             </div>
-            
             <div class="grid grid-cols-1 gap-2.5 text-xs">
                 <button onclick="applyTheme('default')" class="p-3 input-element border rounded-2xl flex items-center justify-between theme-dot">
                     <span class="font-medium">🌿 Minty Sage (เขียวมินต์พาสเทล)</span>
@@ -398,43 +435,16 @@
         </div>
     </div>
 
-    <!-- Modal Log Calendar Fasting -->
-    <div id="calendar-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4 hidden">
-        <div class="card-element border rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm space-y-4 soft-shadow">
-            <h3 id="cal-modal-title" class="font-bold text-sm" style="color: var(--text-main);">บันทึกการ Fasting</h3>
-            <div>
-                <label class="text-[10px] text-slate-400">สถานะ</label>
-                <select id="cal-status" class="w-full input-element border rounded-xl p-2.5 text-xs">
-                    <option value="Success">✅ สำเร็จ (Hit Goal)</option>
-                    <option value="Shabu Day">🍲 ชาบู / Cheat Day</option>
-                    <option value="Partial">⚠️ สำเร็จบางส่วน</option>
-                    <option value="Missed">❌ ไม่สำเร็จ</option>
-                </select>
-            </div>
-            <div>
-                <label class="text-[10px] text-slate-400">บันทึกเพิ่มเติม</label>
-                <input type="text" id="cal-note" placeholder="เช่น กินชาบูตบท้าย" class="w-full input-element border rounded-xl p-2.5 text-xs">
-            </div>
-            <div class="flex gap-2 pt-1">
-                <button id="btn-del-cal" onclick="clearCalendarEntry()" class="w-1/3 py-2.5 bg-rose-500/10 border border-rose-500/20 text-rose-400 font-bold rounded-xl text-xs active:scale-95">
-                    <i class="fa-solid fa-trash-can mr-1"></i>ลบข้อมูล
-                </button>
-                <button onclick="saveCalendarEntry()" class="w-2/3 py-2.5 text-white font-bold rounded-xl text-xs active:scale-95 shadow-sm" style="background-color: var(--accent);">บันทึก</button>
-            </div>
-        </div>
-    </div>
-
     <script>
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzY38zVJlc70UqiMKc1Ao8Nt6KmOcc06vMCIlRFWgKz4uHpnPAjul7s0PAITVg9XO7Zcw/exec";
 
-        let fastingHours = 16, isRunning = false, startTime = null, targetEndTime = null, timerInterval = null;
         let weightChartInstance = null;
         let profileData = {}, weightLogs = [];
-        let calendarLogs = JSON.parse(localStorage.getItem('if_mobile_calendar_logs')) || {};
-        let currentMonth = new Date().getMonth(), currentYear = new Date().getFullYear(), selectedCalDate = null;
+        let calendarLogs = JSON.parse(localStorage.getItem('cal_mobile_calendar_logs')) || {};
+        let foodLogsData = JSON.parse(localStorage.getItem('cal_mobile_food_logs')) || {};
+        let currentMonth = new Date().getMonth(), currentYear = new Date().getFullYear();
 
         window.onload = function() {
-            // โหลดตั้งค่า Dark Mode
             const isDark = localStorage.getItem('if_dark_mode') === 'true';
             if (isDark) {
                 document.documentElement.classList.add('dark');
@@ -444,16 +454,23 @@
             const savedTheme = localStorage.getItem('if_light_pastel_theme') || 'default';
             applyTheme(savedTheme, false);
 
-            setCurrentTimeInput();
+            initDateInputs();
             fetchDataFromSheets();
-            renderCalendar();
         };
+
+        function initDateInputs() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            document.getElementById('cal-log-date').value = `${year}-${month}-${day}`;
+            loadDailyFoodLogs();
+        }
 
         // --- DARK MODE TOGGLE ---
         function toggleDarkMode() {
             const htmlEl = document.documentElement;
             const darkIcon = document.getElementById('dark-icon');
-            
             if (htmlEl.classList.contains('dark')) {
                 htmlEl.classList.remove('dark');
                 darkIcon.className = 'fa-solid fa-moon text-xs text-amber-400';
@@ -470,15 +487,11 @@
         function openThemeModal() { document.getElementById('theme-modal').classList.remove('hidden'); }
         function closeThemeModal() { document.getElementById('theme-modal').classList.add('hidden'); }
 
-        function applyTheme(themeName, showToast = true) {
+        function applyTheme(themeName) {
             const htmlEl = document.documentElement;
-            if (themeName === 'default') {
-                htmlEl.removeAttribute('data-theme');
-            } else {
-                htmlEl.setAttribute('data-theme', themeName);
-            }
+            if (themeName === 'default') htmlEl.removeAttribute('data-theme');
+            else htmlEl.setAttribute('data-theme', themeName);
             localStorage.setItem('if_light_pastel_theme', themeName);
-            
             if (weightChartInstance) initOrUpdateChart();
             closeThemeModal();
         }
@@ -496,8 +509,10 @@
                 updateUIProfile();
                 calculateHealthMetrics();
                 initOrUpdateChart();
+                renderCalendar();
             } catch (err) {
-                alert("ไม่สามารถโหลดข้อมูลจาก Google Sheets ได้ กรุณาตรวจสอบสิทธิ์ Access ใน Apps Script");
+                console.warn("Could not fetch cloud data, using defaults.");
+                calculateHealthMetrics();
             } finally {
                 showLoading(false);
             }
@@ -530,19 +545,158 @@
             showLoading(true);
             const date = document.getElementById('log-date').value;
             const weight = Number(document.getElementById('log-weight-val').value);
-
             try {
                 await fetch(GOOGLE_SCRIPT_URL, {
                     method: "POST",
                     body: JSON.stringify({ action: "saveWeight", date, weight })
                 });
-
                 closeWeightModal();
                 await fetchDataFromSheets();
             } catch(e) {
                 alert("เกิดข้อผิดพลาดในการบันทึกน้ำหนัก");
                 showLoading(false);
             }
+        }
+
+        // --- FOOD LOGIC & DYNAMIC TABLE ROWS ---
+        function loadDailyFoodLogs() {
+            const dateKey = document.getElementById('cal-log-date').value;
+            const dayData = foodLogsData[dateKey] || { breakfast: [], lunch: [], dinner: [], snack: [] };
+
+            ['breakfast', 'lunch', 'dinner', 'snack'].forEach(meal => {
+                const container = document.getElementById(`container-${meal}`);
+                container.innerHTML = '';
+                if (dayData[meal] && dayData[meal].length > 0) {
+                    dayData[meal].forEach(item => {
+                        appendFoodRowDOM(meal, item.name, item.cal);
+                    });
+                } else {
+                    appendFoodRowDOM(meal, '', '');
+                }
+            });
+            calculateTotalCalories();
+        }
+
+        function addFoodRow(meal) {
+            appendFoodRowDOM(meal, '', '');
+        }
+
+        function appendFoodRowDOM(meal, nameVal, calVal) {
+            const container = document.getElementById(`container-${meal}`);
+            const row = document.createElement('div');
+            row.className = 'flex items-center gap-2 food-row';
+            row.innerHTML = `
+                <input type="text" placeholder="ชื่อเมนูอาหาร" value="${nameVal}" class="w-7/12 input-element border rounded-xl p-2 text-xs food-name">
+                <input type="number" placeholder="kcal" value="${calVal}" oninput="calculateTotalCalories()" class="w-3/12 input-element border rounded-xl p-2 text-xs food-cal text-center">
+                <button onclick="removeFoodRow(this)" class="w-2/12 p-2 text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs active:scale-95"><i class="fa-solid fa-trash-can"></i></button>
+            `;
+            container.appendChild(row);
+            calculateTotalCalories();
+        }
+
+        function removeFoodRow(btn) {
+            const row = btn.parentElement;
+            const container = row.parentElement;
+            if (container.children.length > 1) {
+                row.remove();
+            } else {
+                row.querySelector('.food-name').value = '';
+                row.querySelector('.food-cal').value = '';
+            }
+            calculateTotalCalories();
+        }
+
+        // --- ฟังก์ชันเคลียร์ข้อมูลของวันที่เลือก ---
+        function clearDayLogs() {
+            if (!confirm("คุณต้องการล้างรายการอาหารทั้งหมดของวันนี้ใช่หรือไม่?")) return;
+            const dateKey = document.getElementById('cal-log-date').value;
+
+            // ลบข้อมูลอาหารในหน่วยความจำ
+            delete foodLogsData[dateKey];
+            localStorage.setItem('cal_mobile_food_logs', JSON.stringify(foodLogsData));
+
+            // ลบสถานะในปฏิทินของวันนี้ออกด้วย
+            delete calendarLogs[dateKey];
+            localStorage.setItem('cal_mobile_calendar_logs', JSON.stringify(calendarLogs));
+
+            // รีเฟรชหน้าจอฟอร์มอาหารและปฏิทิน
+            loadDailyFoodLogs();
+            renderCalendar();
+            alert("เคลียร์ข้อมูลของวันนี้เรียบร้อยแล้วครับ");
+        }
+
+        function calculateTotalCalories() {
+            let grandTotal = 0;
+            const meals = ['breakfast', 'lunch', 'dinner', 'snack'];
+            
+            meals.forEach(meal => {
+                const container = document.getElementById(`container-${meal}`);
+                let mealSum = 0;
+                const rows = container.querySelectorAll('.food-row');
+                rows.forEach(r => {
+                    const cal = Number(r.querySelector('.food-cal').value) || 0;
+                    mealSum += cal;
+                });
+                document.getElementById(`sum-${meal}`).innerText = `${mealSum} kcal`;
+                grandTotal += mealSum;
+            });
+
+            document.getElementById('total-consumed-cal').innerText = grandTotal.toLocaleString();
+            
+            const targetCal = Number(document.getElementById('cal-target-val').innerText.replace(/,/g, '')) || 2000;
+            const remaining = targetCal - grandTotal;
+            const remEl = document.getElementById('remaining-cal');
+            const statusEl = document.getElementById('cal-status-text');
+
+            remEl.innerText = remaining.toLocaleString();
+            if (remaining >= 0) {
+                remEl.className = 'text-base font-extrabold text-sky-400';
+                statusEl.innerText = 'เหลือทานได้';
+                statusEl.className = 'text-[11px] font-bold text-emerald-400';
+            } else {
+                remEl.className = 'text-base font-extrabold text-rose-400';
+                statusEl.innerText = 'เกินเป้าหมาย!';
+                statusEl.className = 'text-[11px] font-bold text-rose-400';
+            }
+        }
+
+        function saveFoodLogsToLocal() {
+            const dateKey = document.getElementById('cal-log-date').value;
+            const dayData = { breakfast: [], lunch: [], dinner: [], snack: [] };
+
+            ['breakfast', 'lunch', 'dinner', 'snack'].forEach(meal => {
+                const container = document.getElementById(`container-${meal}`);
+                const rows = container.querySelectorAll('.food-row');
+                rows.forEach(r => {
+                    const name = r.querySelector('.food-name').value.trim();
+                    const cal = Number(r.querySelector('.food-cal').value) || 0;
+                    if (name || cal > 0) {
+                        dayData[meal].push({ name, cal });
+                    }
+                });
+            });
+
+            foodLogsData[dateKey] = dayData;
+            localStorage.setItem('cal_mobile_food_logs', JSON.stringify(foodLogsData));
+
+            const targetCal = Number(document.getElementById('cal-target-val').innerText.replace(/,/g, '')) || 2000;
+            const totalConsumed = Number(document.getElementById('total-consumed-cal').innerText.replace(/,/g, '')) || 0;
+            let status = 'Success';
+            let note = `ทานไป ${totalConsumed} kcal`;
+            
+            if (totalConsumed > targetCal + 300) {
+                status = 'Missed';
+                note = 'แคลอรีเกินเป้าหมายมาก';
+            } else if (totalConsumed > targetCal) {
+                status = 'Partial';
+                note = 'เกินเป้าเล็กน้อย';
+            }
+
+            calendarLogs[dateKey] = { status, note };
+            localStorage.setItem('cal_mobile_calendar_logs', JSON.stringify(calendarLogs));
+
+            alert("บันทึกรายการอาหารและอัปเดตปฏิทินเรียบร้อยแล้ว!");
+            renderCalendar();
         }
 
         // --- HEALTH COMPUTATION ---
@@ -558,11 +712,19 @@
             const gender = document.getElementById('user-gender').value;
             const age = Number(document.getElementById('user-age').value) || 28;
             const height = Number(document.getElementById('user-height').value) || 170;
-            const weight = Number(document.getElementById('user-weight').value) || 70;
+            
+            let latestWeight = Number(document.getElementById('user-weight').value) || 70;
+            if (weightLogs && weightLogs.length > 0) {
+                const sortedLogs = [...weightLogs].sort((a, b) => new Date(b.date) - new Date(a.date));
+                latestWeight = Number(sortedLogs[0].weight) || latestWeight;
+            }
+
+            document.getElementById('current-weight-display').innerText = latestWeight;
+
             const lossRate = Number(document.getElementById('user-loss-rate').value) || 0.5;
 
             const hM = height / 100;
-            const bmi = (weight / (hM * hM)).toFixed(1);
+            const bmi = (latestWeight / (hM * hM)).toFixed(1);
             document.getElementById('bmi-val').innerText = bmi;
 
             let bmiText = "สมส่วน";
@@ -571,7 +733,7 @@
             else if (bmi >= 25) bmiText = "อ้วน";
             document.getElementById('bmi-status').innerText = bmiText;
 
-            let bmr = (10 * weight) + (6.25 * height) - (5 * age);
+            let bmr = (10 * latestWeight) + (6.25 * height) - (5 * age);
             bmr = gender === 'male' ? bmr + 5 : bmr - 161;
 
             const tdee = bmr * 1.375;
@@ -580,40 +742,33 @@
             const dailyDeficit = (lossRate * 7700) / 7; 
             let targetCal = Math.round(tdee - dailyDeficit);
             const minSafetyCal = Math.round(bmr);
-            
             if (targetCal < minSafetyCal) targetCal = minSafetyCal;
 
             document.getElementById('cal-target-val').innerText = targetCal.toLocaleString();
+            document.getElementById('target-cal-display').innerText = targetCal.toLocaleString() + ' kcal';
             document.getElementById('cal-min-val').innerText = minSafetyCal.toLocaleString();
+
+            calculateTotalCalories();
         }
 
         function initOrUpdateChart() {
             const ctx = document.getElementById('weightChart').getContext('2d');
-            
             const formattedLogs = weightLogs.map(l => {
                 let dateStr = l.date;
                 if (dateStr.includes('T')) {
                     const d = new Date(dateStr);
-                    const year = d.getFullYear();
-                    const month = String(d.getMonth() + 1).padStart(2, '0');
-                    const day = String(d.getDate()).padStart(2, '0');
-                    dateStr = `${year}-${month}-${day}`;
+                    dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
                 }
                 return { date: dateStr, weight: l.weight };
             });
 
             const uniqueLogsMap = {};
             formattedLogs.forEach(item => { uniqueLogsMap[item.date] = item.weight; });
-
-            const cleanLogs = Object.keys(uniqueLogsMap).map(date => ({
-                date: date,
-                weight: uniqueLogsMap[date]
-            })).sort((a, b) => new Date(a.date) - new Date(b.date));
+            const cleanLogs = Object.keys(uniqueLogsMap).map(date => ({ date, weight: uniqueLogsMap[date] })).sort((a, b) => new Date(a.date) - new Date(b.date));
 
             const labels = cleanLogs.map(l => l.date);
             const data = cleanLogs.map(l => l.weight);
             const targetData = cleanLogs.map(() => Number(document.getElementById('user-target').value) || 62);
-
             const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#10b981';
             const isDark = document.documentElement.classList.contains('dark');
 
@@ -666,14 +821,13 @@
                 let bg = isDark ? 'input-element border text-slate-300' : 'bg-slate-50 border-slate-100 text-slate-600';
                 
                 if (log) {
-                    if (log.status === 'Success') bg = isDark ? 'bg-emerald-900/30 border-emerald-500/40 text-emerald-400' : 'bg-emerald-100 border-emerald-200 text-emerald-700';
-                    else if (log.status === 'Shabu Day') bg = isDark ? 'bg-amber-900/30 border-amber-500/40 text-amber-400' : 'bg-amber-100 border-amber-200 text-amber-700';
-                    else if (log.status === 'Partial') bg = isDark ? 'bg-sky-900/30 border-sky-500/40 text-sky-400' : 'bg-sky-100 border-sky-200 text-sky-700';
-                    else if (log.status === 'Missed') bg = isDark ? 'bg-rose-900/30 border-rose-500/40 text-rose-400' : 'bg-rose-100 border-rose-200 text-rose-700';
+                    if (log.status === 'Success') bg = isDark ? 'bg-emerald-900/35 border-emerald-500/40 text-emerald-400' : 'bg-emerald-100 border-emerald-200 text-emerald-700';
+                    else if (log.status === 'Partial') bg = isDark ? 'bg-amber-900/35 border-amber-500/40 text-amber-400' : 'bg-amber-100 border-amber-200 text-amber-700';
+                    else if (log.status === 'Missed') bg = isDark ? 'bg-rose-900/35 border-rose-500/40 text-rose-400' : 'bg-rose-100 border-rose-200 text-rose-700';
                 }
 
                 html += `
-                    <div onclick="openCalendarModal('${dateKey}')" class="aspect-square rounded-xl border ${bg} p-1 flex flex-col justify-between items-center cursor-pointer active:scale-95 transition">
+                    <div onclick="jumpToDate('${dateKey}')" class="aspect-square rounded-xl border ${bg} p-1 flex flex-col justify-between items-center cursor-pointer active:scale-95 transition">
                         <span class="text-[11px] font-bold">${d}</span>
                         <span class="text-[8px] truncate font-medium">${log ? log.status.slice(0,4) : ''}</span>
                     </div>`;
@@ -681,110 +835,10 @@
             grid.innerHTML = html;
         }
 
-        function openCalendarModal(dateStr) {
-            selectedCalDate = dateStr;
-            document.getElementById('cal-modal-title').innerText = `บันทึกสำหรับ ${dateStr}`;
-            const log = calendarLogs[dateStr];
-            
-            if (log) {
-                document.getElementById('cal-status').value = log.status || 'Success';
-                document.getElementById('cal-note').value = log.note || '';
-                document.getElementById('btn-del-cal').style.display = 'block';
-            } else {
-                document.getElementById('cal-status').value = 'Success';
-                document.getElementById('cal-note').value = '';
-                document.getElementById('btn-del-cal').style.display = 'none';
-            }
-            
-            document.getElementById('calendar-modal').classList.remove('hidden');
-        }
-
-        function closeCalendarModal() { document.getElementById('calendar-modal').classList.add('hidden'); }
-
-        function saveCalendarEntry() {
-            calendarLogs[selectedCalDate] = {
-                status: document.getElementById('cal-status').value,
-                note: document.getElementById('cal-note').value
-            };
-            localStorage.setItem('if_mobile_calendar_logs', JSON.stringify(calendarLogs));
-            closeCalendarModal();
-            renderCalendar();
-        }
-
-        function clearCalendarEntry() {
-            if (calendarLogs[selectedCalDate]) {
-                delete calendarLogs[selectedCalDate];
-                localStorage.setItem('if_mobile_calendar_logs', JSON.stringify(calendarLogs));
-            }
-            closeCalendarModal();
-            renderCalendar();
-        }
-
-        // --- TIMER FUNCTIONS ---
-        function setCurrentTimeInput() {
-            const now = new Date();
-            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-            document.getElementById('custom-start-time').value = now.toISOString().slice(0, 16);
-        }
-
-        function toggleFast() {
-            const btn = document.getElementById('btn-toggle-fast');
-            if (!isRunning) {
-                const val = document.getElementById('custom-start-time').value;
-                if (!val) return alert("โปรดเลือกเวลาเริ่มต้น");
-                startTime = new Date(val);
-                targetEndTime = new Date(startTime.getTime() + fastingHours * 3600000);
-                isRunning = true;
-                btn.innerText = "สิ้นสุด Fasting";
-                btn.style.backgroundColor = "#ef4444";
-                btn.style.color = "#ffffff";
-                startTimerLoop();
-            } else {
-                isRunning = false;
-                clearInterval(timerInterval);
-                btn.innerText = "เริ่มอดอาหาร (Start Fasting)";
-                btn.style.backgroundColor = "var(--accent)";
-                btn.style.color = "#ffffff";
-                document.getElementById('timer-display').innerText = "00:00:00";
-                document.getElementById('progress-circle').style.strokeDashoffset = 263.89;
-            }
-        }
-
-        function startTimerLoop() {
-            clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                const now = new Date();
-                const elapsed = Math.floor((now - startTime) / 1000);
-                const total = fastingHours * 3600;
-
-                document.getElementById('start-disp').innerText = startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                document.getElementById('target-disp').innerText = targetEndTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-                if (elapsed < total) {
-                    const rem = total - elapsed;
-                    document.getElementById('timer-display').innerText = formatTime(rem);
-                    document.getElementById('progress-circle').style.strokeDashoffset = 263.89 - ((elapsed / total) * 263.89);
-                } else {
-                    document.getElementById('timer-display').innerText = formatTime(elapsed - total);
-                    document.getElementById('progress-circle').style.strokeDashoffset = 0;
-                }
-            }, 1000);
-        }
-
-        function formatTime(s) {
-            const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
-            return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
-        }
-
-        function setProtocol(h) {
-            fastingHours = h;
-            document.querySelectorAll('#tab-timer button[id^="p-"]').forEach(b => {
-                b.style.backgroundColor = "transparent";
-                b.style.color = "#94a3b8";
-            });
-            const activeBtn = document.getElementById(`p-${h}`);
-            activeBtn.style.backgroundColor = "var(--accent-light)";
-            activeBtn.style.color = "var(--accent)";
+        function jumpToDate(dateStr) {
+            document.getElementById('cal-log-date').value = dateStr;
+            loadDailyFoodLogs();
+            switchTab('timer');
         }
 
         function switchTab(t) {
@@ -792,24 +846,17 @@
                 document.getElementById(`tab-${tab}`).classList.add('hidden');
                 document.getElementById(`nav-${tab}`).style.color = '#94a3b8';
             });
-
             document.getElementById(`tab-${t}`).classList.remove('hidden');
             document.getElementById(`nav-${t}`).style.color = 'var(--accent)';
-
             if (t === 'calendar') renderCalendar();
         }
 
         function openWeightModal() {
             const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            
-            document.getElementById('log-date').value = `${year}-${month}-${day}`;
+            document.getElementById('log-date').value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
             document.getElementById('log-weight-val').value = profileData.weight || 70;
             document.getElementById('weight-modal').classList.remove('hidden');
         }
-        
         function closeWeightModal() { document.getElementById('weight-modal').classList.add('hidden'); }
         function showLoading(show) { document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none'; }
     </script>
