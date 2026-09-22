@@ -136,6 +136,7 @@
             <div>
                 <h1 class="font-bold text-base tracking-tight leading-none" style="color: var(--text-main);">Cal & Health Art</h1>
                 <span class="text-[10px] font-semibold uppercase tracking-wider" style="color: var(--accent);">Cloud Sync Edition</span>
+                <span id="sync-status" class="block text-[8px] font-medium mt-0.5" style="color: var(--accent);">กำลังเตรียมข้อมูล...</span>
             </div>
         </div>
         
@@ -430,17 +431,21 @@
 
     <script>
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzY38zVJlc70UqiMKc1Ao8Nt6KmOcc06vMCIlRFWgKz4uHpnPAjul7s0PAITVg9XO7Zcw/exec";
+        const CACHE_KEY = "calHealthArtCache_v2";
+        const CACHE_MAX_AGE = 1000 * 60 * 60 * 24 * 7;
+        const REQUEST_TIMEOUT = 12000;
 
         let weightChartInstance = null;
-        let profileData = {}, weightLogs = [];
+        let profileData = {};
+        let weightLogs = [];
         let calendarLogs = {};
         let foodLogsData = {};
         let currentMonth = new Date().getMonth(), currentYear = new Date().getFullYear();
+        let syncInProgress = false;
 
-        window.onload = async function() {
-            // โหลดค่าธีมและโหมดมืดจาก Google Sheets (เก็บบนคลาวด์ทั้งหมด)
+        window.onload = function() {
             initDateInputs();
-            await fetchDataFromSheets();
+            bootApp();
         };
 
         function initDateInputs() {
@@ -451,11 +456,148 @@
             document.getElementById('cal-log-date').value = `${year}-${month}-${day}`;
         }
 
+        async function bootApp() {
+            const hasCache = loadCache();
+            if (hasCache) {
+                applyAllLocalData();
+                setSyncStatus('กำลังอัปเดตข้อมูล...', 'syncing');
+                syncFromCloud(false);
+            } else {
+                showLoading(true);
+                setSyncStatus('กำลังเชื่อมต่อ Google Sheets...', 'syncing');
+                await syncFromCloud(true);
+            }
+        }
+
+        function getDefaultProfile() {
+            return { gender: "male", age: 28, height: 170, weight: 70, targetWeight: 62, theme: "default", darkMode: false };
+        }
+
+        function loadCache() {
+            try {
+                const raw = localStorage.getItem(CACHE_KEY);
+                if (!raw) return false;
+                const cached = JSON.parse(raw);
+                if (!cached || !cached.savedAt) return false;
+                if (Date.now() - cached.savedAt > CACHE_MAX_AGE) return false;
+
+                profileData = { ...getDefaultProfile(), ...(cached.profile || {}) };
+                weightLogs = Array.isArray(cached.weightLogs) ? cached.weightLogs : [];
+                foodLogsData = cached.foodLogsData || {};
+                calendarLogs = cached.calendarLogs || {};
+                return true;
+            } catch (e) {
+                console.warn("Cache load failed", e);
+                return false;
+            }
+        }
+
+        function saveCache() {
+            try {
+                localStorage.setItem(CACHE_KEY, JSON.stringify({
+                    savedAt: Date.now(),
+                    profile: profileData,
+                    weightLogs,
+                    foodLogsData,
+                    calendarLogs
+                }));
+            } catch (e) {
+                console.warn("Cache save failed", e);
+            }
+        }
+
+        function applyAllLocalData() {
+            applyCloudSettings();
+            updateUIProfile();
+            calculateHealthMetrics();
+            initOrUpdateChart();
+            loadDailyFoodLogs();
+            renderCalendar();
+        }
+
+        function setSyncStatus(text, state) {
+            const el = document.getElementById('sync-status');
+            if (!el) return;
+            el.innerText = text;
+            el.dataset.state = state || '';
+            if (state === 'success') el.style.color = '#10b981';
+            else if (state === 'error') el.style.color = '#f43f5e';
+            else el.style.color = 'var(--accent)';
+        }
+
+        function showLoading(show) {
+            const el = document.getElementById('loading-overlay');
+            if (el) el.style.display = show ? 'flex' : 'none';
+        }
+
+        async function fetchWithTimeout(url, options = {}, timeout = REQUEST_TIMEOUT) {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), timeout);
+            try {
+                return await fetch(url, { ...options, signal: controller.signal, cache: 'no-store' });
+            } finally {
+                clearTimeout(timer);
+            }
+        }
+
+        async function fetchJsonWithRetry(url, options = {}, retries = 2) {
+            let lastError;
+            for (let attempt = 0; attempt <= retries; attempt++) {
+                try {
+                    const response = await fetchWithTimeout(url, options);
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    const data = await response.json();
+                    if (data && data.status === 'error') throw new Error(data.message || 'Google Apps Script error');
+                    return data;
+                } catch (err) {
+                    lastError = err;
+                    if (attempt < retries) {
+                        await new Promise(resolve => setTimeout(resolve, 500 * Math.pow(2, attempt)));
+                    }
+                }
+            }
+            throw lastError;
+        }
+
+        async function syncFromCloud(showBlockingLoading) {
+            if (syncInProgress) return;
+            syncInProgress = true;
+            if (showBlockingLoading) showLoading(true);
+
+            try {
+                const data = await fetchJsonWithRetry(`${GOOGLE_SCRIPT_URL}?action=getAllData&_=${Date.now()}`, {}, 2);
+
+                profileData = { ...getDefaultProfile(), ...(data.profile || {}) };
+                weightLogs = Array.isArray(data.weightLogs) ? data.weightLogs : [];
+                foodLogsData = data.foodLogs || {};
+                calendarLogs = data.calendarLogs || {};
+
+                saveCache();
+                applyAllLocalData();
+                setSyncStatus('เชื่อมต่อ Google Sheets แล้ว', 'success');
+            } catch (err) {
+                console.warn("Cloud sync failed:", err);
+                if (!loadCache()) {
+                    profileData = { ...getDefaultProfile() };
+                    weightLogs = [];
+                    foodLogsData = {};
+                    calendarLogs = {};
+                    applyAllLocalData();
+                }
+                setSyncStatus('ใช้ข้อมูลในเครื่อง • รอซิงค์', 'error');
+            } finally {
+                syncInProgress = false;
+                if (showBlockingLoading) showLoading(false);
+            }
+        }
+
+        function fetchDataFromSheets() {
+            return syncFromCloud(true);
+        }
+
         async function toggleDarkMode() {
             const htmlEl = document.documentElement;
-            const isDarkNow = htmlEl.classList.contains('dark');
-            const newDarkMode = !isDarkNow;
-            
+            const newDarkMode = !htmlEl.classList.contains('dark');
             if (newDarkMode) {
                 htmlEl.classList.add('dark');
                 document.getElementById('dark-icon').className = 'fa-solid fa-sun text-xs text-amber-300';
@@ -463,10 +605,10 @@
                 htmlEl.classList.remove('dark');
                 document.getElementById('dark-icon').className = 'fa-solid fa-moon text-xs text-amber-500';
             }
-            
             profileData.darkMode = newDarkMode;
-            await saveSettingsToCloud();
+            saveCache();
             if (weightChartInstance) initOrUpdateChart();
+            await saveSettingsToCloud();
         }
 
         function openThemeModal() { document.getElementById('theme-modal').classList.remove('hidden'); }
@@ -476,123 +618,100 @@
             const htmlEl = document.documentElement;
             if (themeName === 'default') htmlEl.removeAttribute('data-theme');
             else htmlEl.setAttribute('data-theme', themeName);
-            
+
             profileData.theme = themeName;
-            await saveSettingsToCloud();
+            saveCache();
             if (weightChartInstance) initOrUpdateChart();
             closeThemeModal();
+            await saveSettingsToCloud();
         }
 
         async function saveSettingsToCloud() {
+            const payload = {
+                action: "saveProfile",
+                gender: profileData.gender || document.getElementById('user-gender').value,
+                age: profileData.age || Number(document.getElementById('user-age').value),
+                height: profileData.height || Number(document.getElementById('user-height').value),
+                weight: profileData.weight || Number(document.getElementById('user-weight').value),
+                targetWeight: profileData.targetWeight || Number(document.getElementById('user-target').value),
+                theme: profileData.theme || 'default',
+                darkMode: !!profileData.darkMode
+            };
             try {
-                await fetch(GOOGLE_SCRIPT_URL, {
+                await fetchJsonWithRetry(GOOGLE_SCRIPT_URL, {
                     method: "POST",
-                    body: JSON.stringify({
-                        action: "saveProfile",
-                        gender: profileData.gender || document.getElementById('user-gender').value,
-                        age: profileData.age || Number(document.getElementById('user-age').value),
-                        height: profileData.height || Number(document.getElementById('user-height').value),
-                        weight: profileData.weight || Number(document.getElementById('user-weight').value),
-                        targetWeight: profileData.targetWeight || Number(document.getElementById('user-target').value),
-                        theme: profileData.theme || 'default',
-                        darkMode: !!profileData.darkMode
-                    })
-                });
-            } catch(e) {
-                console.error("Failed to sync settings", e);
+                    body: JSON.stringify(payload)
+                }, 1);
+                profileData = { ...profileData, ...payload };
+                delete profileData.action;
+                saveCache();
+                setSyncStatus('ซิงค์แล้ว', 'success');
+            } catch (e) {
+                console.warn("Failed to sync settings", e);
+                setSyncStatus('บันทึกในเครื่องแล้ว • รอซิงค์', 'error');
             }
-        }
-
-        async function fetchDataFromSheets() {
-            showLoading(true);
-            try {
-                const resProfile = await fetch(`${GOOGLE_SCRIPT_URL}?action=getProfile`);
-                profileData = await resProfile.json();
-
-                const resLogs = await fetch(`${GOOGLE_SCRIPT_URL}?action=getLogs`);
-                weightLogs = await resLogs.json();
-
-                const resFood = await fetch(`${GOOGLE_SCRIPT_URL}?action=getFoodLogs`);
-                foodLogsData = await resFood.json();
-
-                const resCal = await fetch(`${GOOGLE_SCRIPT_URL}?action=getCalendarLogs`);
-                calendarLogs = await resCal.json();
-
-                applyCloudSettings();
-                updateUIProfile();
-                calculateHealthMetrics();
-                initOrUpdateChart();
-                loadDailyFoodLogs();
-                renderCalendar();
-            } catch (err) {
-                console.warn("Could not fetch cloud data, using defaults.");
-                calculateHealthMetrics();
-            } finally {
-                showLoading(false);
-            }
-        }
-
-        function applyCloudSettings() {
-            const htmlEl = document.documentElement;
-            if (profileData.darkMode) {
-                htmlEl.classList.add('dark');
-                document.getElementById('dark-icon').className = 'fa-solid fa-sun text-xs text-amber-300';
-            } else {
-                htmlEl.classList.remove('dark');
-                document.getElementById('dark-icon').className = 'fa-solid fa-moon text-xs text-amber-500';
-            }
-
-            const themeName = profileData.theme || 'default';
-            if (themeName === 'default') htmlEl.removeAttribute('data-theme');
-            else htmlEl.setAttribute('data-theme', themeName);
         }
 
         async function saveProfileToSheets() {
-            showLoading(true);
             profileData.gender = document.getElementById('user-gender').value;
             profileData.age = Number(document.getElementById('user-age').value);
             profileData.height = Number(document.getElementById('user-height').value);
             profileData.weight = Number(document.getElementById('user-weight').value);
             profileData.targetWeight = Number(document.getElementById('user-target').value);
 
-            const payload = {
-                action: "saveProfile",
-                gender: profileData.gender,
-                age: profileData.age,
-                height: profileData.height,
-                weight: profileData.weight,
-                targetWeight: profileData.targetWeight,
-                theme: profileData.theme || 'default',
-                darkMode: !!profileData.darkMode
-            };
+            saveCache();
+            updateUIProfile();
+            calculateHealthMetrics();
 
+            showLoading(true);
             try {
-                await fetch(GOOGLE_SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
-                updateUIProfile();
-                calculateHealthMetrics();
+                await saveSettingsToCloud();
                 alert("บันทึกข้อมูลลง Google Sheets เรียบร้อยแล้ว!");
-            } catch(e) {
-                alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+            } catch (e) {
+                alert("บันทึกไว้ในเครื่องแล้ว แต่ยังซิงค์ Google Sheets ไม่สำเร็จ");
             } finally {
                 showLoading(false);
             }
         }
 
         async function saveWeightToSheets() {
-            showLoading(true);
             const date = document.getElementById('log-date').value;
             const weight = Number(document.getElementById('log-weight-val').value);
+            if (!date || !weight) return;
+
+            closeWeightModal();
+
+            // อัปเดตหน้าจอทันที ไม่รอ Cloud
+            const existingIndex = weightLogs.findIndex(x => normalizeDate(x.date) === date);
+            if (existingIndex >= 0) weightLogs[existingIndex].weight = weight;
+            else weightLogs.push({ date, weight });
+            profileData.weight = weight;
+            saveCache();
+            updateUIProfile();
+            calculateHealthMetrics();
+            initOrUpdateChart();
+
+            showLoading(true);
             try {
-                await fetch(GOOGLE_SCRIPT_URL, {
+                await fetchJsonWithRetry(GOOGLE_SCRIPT_URL, {
                     method: "POST",
                     body: JSON.stringify({ action: "saveWeight", date, weight })
-                });
-                closeWeightModal();
-                await fetchDataFromSheets();
-            } catch(e) {
-                alert("เกิดข้อผิดพลาดในการบันทึกน้ำหนัก");
+                }, 2);
+                setSyncStatus('ซิงค์น้ำหนักแล้ว', 'success');
+            } catch (e) {
+                setSyncStatus('น้ำหนักบันทึกในเครื่องแล้ว • รอซิงค์', 'error');
+                alert("บันทึกน้ำหนักในเครื่องแล้ว แต่ Google Sheets ยังไม่ตอบสนอง");
+            } finally {
                 showLoading(false);
             }
+        }
+
+        function normalizeDate(value) {
+            if (!value) return '';
+            if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+            const d = new Date(value);
+            if (isNaN(d.getTime())) return String(value).trim();
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
         }
 
         function loadDailyFoodLogs() {
@@ -603,9 +722,7 @@
                 const container = document.getElementById(`container-${meal}`);
                 container.innerHTML = '';
                 if (dayData[meal] && dayData[meal].length > 0) {
-                    dayData[meal].forEach(item => {
-                        appendFoodRowDOM(meal, item.name, item.cal);
-                    });
+                    dayData[meal].forEach(item => appendFoodRowDOM(meal, item.name, item.cal));
                 } else {
                     appendFoodRowDOM(meal, '', '');
                 }
@@ -613,19 +730,32 @@
             calculateTotalCalories();
         }
 
-        function addFoodRow(meal) {
-            appendFoodRowDOM(meal, '', '');
-        }
+        function addFoodRow(meal) { appendFoodRowDOM(meal, '', ''); }
 
         function appendFoodRowDOM(meal, nameVal, calVal) {
             const container = document.getElementById(`container-${meal}`);
             const row = document.createElement('div');
             row.className = 'flex items-center gap-2 food-row';
-            row.innerHTML = `
-                <input type="text" placeholder="ชื่อเมนูอาหาร" value="${nameVal}" class="w-7/12 input-element border rounded-xl p-2 text-xs font-medium food-name">
-                <input type="number" placeholder="kcal" value="${calVal}" oninput="calculateTotalCalories()" class="w-3/12 input-element border rounded-xl p-2 text-xs font-bold food-cal text-center">
-                <button onclick="removeFoodRow(this)" class="w-2/12 p-2 text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs active:scale-95"><i class="fa-solid fa-trash-can"></i></button>
-            `;
+
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.placeholder = 'ชื่อเมนูอาหาร';
+            nameInput.value = nameVal || '';
+            nameInput.className = 'w-7/12 input-element border rounded-xl p-2 text-xs font-medium food-name';
+
+            const calInput = document.createElement('input');
+            calInput.type = 'number';
+            calInput.placeholder = 'kcal';
+            calInput.value = calVal === '' ? '' : (calVal ?? '');
+            calInput.className = 'w-3/12 input-element border rounded-xl p-2 text-xs font-bold food-cal text-center';
+            calInput.oninput = calculateTotalCalories;
+
+            const btn = document.createElement('button');
+            btn.className = 'w-2/12 p-2 text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs active:scale-95';
+            btn.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
+            btn.onclick = function() { removeFoodRow(btn); };
+
+            row.append(nameInput, calInput, btn);
             container.appendChild(row);
             calculateTotalCalories();
         }
@@ -633,9 +763,8 @@
         function removeFoodRow(btn) {
             const row = btn.parentElement;
             const container = row.parentElement;
-            if (container.children.length > 1) {
-                row.remove();
-            } else {
+            if (container.children.length > 1) row.remove();
+            else {
                 row.querySelector('.food-name').value = '';
                 row.querySelector('.food-cal').value = '';
             }
@@ -648,16 +777,27 @@
 
             delete foodLogsData[dateKey];
             delete calendarLogs[dateKey];
+            saveCache();
+            loadDailyFoodLogs();
+            renderCalendar();
 
             showLoading(true);
             try {
-                await fetch(GOOGLE_SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "saveFoodLogs", date: dateKey, dayData: { breakfast: [], lunch: [], dinner: [], snack: [] } }) });
-                await fetch(GOOGLE_SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "saveCalendarLog", date: dateKey, status: "", note: "" }) });
-                loadDailyFoodLogs();
-                renderCalendar();
+                await fetchJsonWithRetry(GOOGLE_SCRIPT_URL, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        action: "saveDay",
+                        date: dateKey,
+                        dayData: { breakfast: [], lunch: [], dinner: [], snack: [] },
+                        status: "",
+                        note: ""
+                    })
+                }, 2);
+                setSyncStatus('ล้างข้อมูลและซิงค์แล้ว', 'success');
                 alert("เคลียร์ข้อมูลของวันนี้เรียบร้อยแล้วครับ");
             } catch(e) {
-                alert("เกิดข้อผิดพลาดในการล้างข้อมูล");
+                setSyncStatus('ล้างข้อมูลในเครื่องแล้ว • รอซิงค์', 'error');
+                alert("ล้างข้อมูลในเครื่องแล้ว แต่ Google Sheets ยังไม่ตอบสนอง");
             } finally {
                 showLoading(false);
             }
@@ -665,22 +805,19 @@
 
         function calculateTotalCalories() {
             let grandTotal = 0;
-            const meals = ['breakfast', 'lunch', 'dinner', 'snack'];
-            
-            meals.forEach(meal => {
+            ['breakfast', 'lunch', 'dinner', 'snack'].forEach(meal => {
                 const container = document.getElementById(`container-${meal}`);
                 let mealSum = 0;
-                const rows = container.querySelectorAll('.food-row');
-                rows.forEach(r => {
-                    const cal = Number(r.querySelector('.food-cal').value) || 0;
-                    mealSum += cal;
-                });
+                if (container) {
+                    container.querySelectorAll('.food-row').forEach(r => {
+                        mealSum += Number(r.querySelector('.food-cal').value) || 0;
+                    });
+                }
                 document.getElementById(`sum-${meal}`).innerText = `${mealSum} kcal`;
                 grandTotal += mealSum;
             });
 
             document.getElementById('total-consumed-cal').innerText = grandTotal.toLocaleString();
-            
             const targetCal = Number(document.getElementById('cal-target-val').innerText.replace(/,/g, '')) || 2000;
             const remaining = targetCal - grandTotal;
             const remEl = document.getElementById('remaining-cal');
@@ -704,23 +841,17 @@
 
             ['breakfast', 'lunch', 'dinner', 'snack'].forEach(meal => {
                 const container = document.getElementById(`container-${meal}`);
-                const rows = container.querySelectorAll('.food-row');
-                rows.forEach(r => {
+                container.querySelectorAll('.food-row').forEach(r => {
                     const name = r.querySelector('.food-name').value.trim();
                     const cal = Number(r.querySelector('.food-cal').value) || 0;
-                    if (name || cal > 0) {
-                        dayData[meal].push({ name, cal });
-                    }
+                    if (name || cal > 0) dayData[meal].push({ name, cal });
                 });
             });
-
-            foodLogsData[dateKey] = dayData;
 
             const targetCal = Number(document.getElementById('cal-target-val').innerText.replace(/,/g, '')) || 2000;
             const totalConsumed = Number(document.getElementById('total-consumed-cal').innerText.replace(/,/g, '')) || 0;
             let status = 'Success';
             let note = `ทานไป ${totalConsumed} kcal`;
-            
             if (totalConsumed > targetCal + 300) {
                 status = 'Missed';
                 note = 'แคลอรีเกินเป้าหมายมาก';
@@ -729,22 +860,23 @@
                 note = 'เกินเป้าเล็กน้อย';
             }
 
+            // แสดงผลทันที + cache ก่อน
+            foodLogsData[dateKey] = dayData;
             calendarLogs[dateKey] = { status, note };
+            saveCache();
+            renderCalendar();
 
             showLoading(true);
             try {
-                await fetch(GOOGLE_SCRIPT_URL, {
+                await fetchJsonWithRetry(GOOGLE_SCRIPT_URL, {
                     method: "POST",
-                    body: JSON.stringify({ action: "saveFoodLogs", date: dateKey, dayData: dayData })
-                });
-                await fetch(GOOGLE_SCRIPT_URL, {
-                    method: "POST",
-                    body: JSON.stringify({ action: "saveCalendarLog", date: dateKey, status: status, note: note })
-                });
-                alert("บันทึกรายการอาหารและซิงค์ขึ้น Cloud เรียบร้อยแล้ว!");
-                renderCalendar();
+                    body: JSON.stringify({ action: "saveDay", date: dateKey, dayData, status, note })
+                }, 2);
+                setSyncStatus('บันทึกและซิงค์แล้ว', 'success');
+                alert("บันทึกรายการอาหารและซิงค์ขึ้น Google Sheets เรียบร้อยแล้ว!");
             } catch (e) {
-                alert("เกิดข้อผิดพลาดในการบันทึกข้อมูลลง Cloud");
+                setSyncStatus('บันทึกในเครื่องแล้ว • รอซิงค์', 'error');
+                alert("บันทึกในเครื่องแล้ว แต่ Google Sheets ยังไม่ตอบสนอง");
             } finally {
                 showLoading(false);
             }
@@ -758,11 +890,26 @@
             document.getElementById('user-target').value = profileData.targetWeight || 62;
         }
 
+        function applyCloudSettings() {
+            const htmlEl = document.documentElement;
+            if (profileData.darkMode) {
+                htmlEl.classList.add('dark');
+                document.getElementById('dark-icon').className = 'fa-solid fa-sun text-xs text-amber-300';
+            } else {
+                htmlEl.classList.remove('dark');
+                document.getElementById('dark-icon').className = 'fa-solid fa-moon text-xs text-amber-500';
+            }
+
+            const themeName = profileData.theme || 'default';
+            if (themeName === 'default') htmlEl.removeAttribute('data-theme');
+            else htmlEl.setAttribute('data-theme', themeName);
+        }
+
         function calculateHealthMetrics() {
             const gender = document.getElementById('user-gender').value;
             const age = Number(document.getElementById('user-age').value) || 28;
             const height = Number(document.getElementById('user-height').value) || 170;
-            
+
             let latestWeight = Number(document.getElementById('user-weight').value) || 70;
             if (weightLogs && weightLogs.length > 0) {
                 const sortedLogs = [...weightLogs].sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -770,9 +917,7 @@
             }
 
             document.getElementById('current-weight-display').innerText = latestWeight;
-
             const lossRate = Number(document.getElementById('user-loss-rate').value) || 0.5;
-
             const hM = height / 100;
             const bmi = (latestWeight / (hM * hM)).toFixed(1);
             document.getElementById('bmi-val').innerText = bmi;
@@ -785,11 +930,10 @@
 
             let bmr = (10 * latestWeight) + (6.25 * height) - (5 * age);
             bmr = gender === 'male' ? bmr + 5 : bmr - 161;
-
             const tdee = bmr * 1.375;
             document.getElementById('tdee-val').innerText = Math.round(tdee).toLocaleString();
 
-            const dailyDeficit = (lossRate * 7700) / 7; 
+            const dailyDeficit = (lossRate * 7700) / 7;
             let targetCal = Math.round(tdee - dailyDeficit);
             const minSafetyCal = Math.round(bmr);
             if (targetCal < minSafetyCal) targetCal = minSafetyCal;
@@ -802,19 +946,20 @@
         }
 
         function initOrUpdateChart() {
-            const ctx = document.getElementById('weightChart').getContext('2d');
+            const canvas = document.getElementById('weightChart');
+            if (!canvas || typeof Chart === 'undefined') return;
+            const ctx = canvas.getContext('2d');
+
             const formattedLogs = weightLogs.map(l => {
-                let dateStr = l.date;
-                if (dateStr.includes('T')) {
-                    const d = new Date(dateStr);
-                    dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-                }
+                const dateStr = normalizeDate(l.date);
                 return { date: dateStr, weight: l.weight };
             });
 
             const uniqueLogsMap = {};
             formattedLogs.forEach(item => { uniqueLogsMap[item.date] = item.weight; });
-            const cleanLogs = Object.keys(uniqueLogsMap).map(date => ({ date, weight: uniqueLogsMap[date] })).sort((a, b) => new Date(a.date) - new Date(b.date));
+            const cleanLogs = Object.keys(uniqueLogsMap)
+                .map(date => ({ date, weight: uniqueLogsMap[date] }))
+                .sort((a, b) => new Date(a.date) - new Date(b.date));
 
             const labels = cleanLogs.map(l => l.date);
             const data = cleanLogs.map(l => l.weight);
@@ -854,9 +999,10 @@
 
         function renderCalendar() {
             const grid = document.getElementById('calendar-grid');
+            if (!grid) return;
             const monthNames = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
             document.getElementById('calendar-month-year').innerText = `${monthNames[currentMonth]} ${currentYear + 543}`;
-            
+
             const firstDay = new Date(currentYear, currentMonth, 1).getDay();
             const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
             const isDark = document.documentElement.classList.contains('dark');
@@ -868,18 +1014,17 @@
                 const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                 const log = calendarLogs[dateKey];
                 let bg = isDark ? 'input-element border text-slate-300' : 'bg-slate-100/70 border-slate-200 text-slate-700';
-                
+
                 if (log) {
                     if (log.status === 'Success') bg = isDark ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-400' : 'bg-emerald-100 border-emerald-300 text-emerald-800 font-bold';
                     else if (log.status === 'Partial') bg = isDark ? 'bg-amber-950/40 border-amber-500/40 text-amber-400' : 'bg-amber-100 border-amber-300 text-amber-800 font-bold';
                     else if (log.status === 'Missed') bg = isDark ? 'bg-rose-950/40 border-rose-500/40 text-rose-400' : 'bg-rose-100 border-rose-300 text-rose-800 font-bold';
                 }
 
-                html += `
-                    <div onclick="jumpToDate('${dateKey}')" class="aspect-square rounded-2xl border ${bg} p-1 flex flex-col justify-between items-center cursor-pointer active:scale-95 transition shadow-sm">
-                        <span class="text-[11px] font-bold">${d}</span>
-                        <span class="text-[8px] truncate font-semibold">${log ? log.status.slice(0,4) : ''}</span>
-                    </div>`;
+                html += `<div onclick="jumpToDate('${dateKey}')" class="aspect-square rounded-2xl border ${bg} p-1 flex flex-col justify-between items-center cursor-pointer active:scale-95 transition shadow-sm">
+                    <span class="text-[11px] font-bold">${d}</span>
+                    <span class="text-[8px] truncate font-semibold">${log ? log.status.slice(0,4) : ''}</span>
+                </div>`;
             }
             grid.innerHTML = html;
         }
@@ -908,8 +1053,9 @@
             document.getElementById('log-weight-val').value = profileData.weight || 70;
             document.getElementById('weight-modal').classList.remove('hidden');
         }
+
         function closeWeightModal() { document.getElementById('weight-modal').classList.add('hidden'); }
-        function showLoading(show) { document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none'; }
     </script>
+
 </body>
 </html>
