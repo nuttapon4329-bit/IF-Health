@@ -27,13 +27,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Artistic Color Schemes & Soft Dark Mode */
         :root {
             --bg-main: #f8fafc;
             --bg-card: #ffffff;
             --bg-input: #f1f5f9;
             --border-color: #e2e8f0;
-            --accent: #6366f1; /* Indigo Art */
+            --accent: #6366f1;
             --accent-light: #e0e7ff;
             --text-main: #0f172a;
             --text-sub: #475569;
@@ -44,7 +43,7 @@
             --bg-card: #ffffff;
             --bg-input: #ffe4e6;
             --border-color: #fecdd3;
-            --accent: #f43f5e; /* Rose Sunset */
+            --accent: #f43f5e;
             --accent-light: #ffe4e6;
             --text-main: #4c0519;
             --text-sub: #881337;
@@ -55,7 +54,7 @@
             --bg-card: #ffffff;
             --bg-input: #dcfce7;
             --border-color: #bbf7d0;
-            --accent: #059669; /* Rich Emerald */
+            --accent: #059669;
             --accent-light: #dcfce7;
             --text-main: #022c22;
             --text-sub: #065f46;
@@ -66,7 +65,7 @@
             --bg-card: #ffffff;
             --bg-input: #fae8ff;
             --border-color: #f5d0fe;
-            --accent: #d946ef; /* Neon Orchid */
+            --accent: #d946ef;
             --accent-light: #fae8ff;
             --text-main: #4a044e;
             --text-sub: #86198f;
@@ -77,18 +76,17 @@
             --bg-card: #ffffff;
             --bg-input: #fef3c7;
             --border-color: #fde68a;
-            --accent: #d97706; /* Sunset Amber */
+            --accent: #d97706;
             --accent-light: #fef3c7;
             --text-main: #451a03;
             --text-sub: #92400e;
         }
 
-        /* Soft & Cozy Dark Mode */
         html.dark {
-            --bg-main: #131b2e;      
-            --bg-card: #1c263d;      
-            --bg-input: #25334d;     
-            --border-color: #2d3e5b; 
+            --bg-main: #131b2e;
+            --bg-card: #1c263d;
+            --bg-input: #25334d;
+            --border-color: #2d3e5b;
             --accent-light: rgba(99, 102, 241, 0.2);
             --text-main: #f1f5f9;
             --text-sub: #94a3b8;
@@ -159,7 +157,6 @@
 
         <!-- TAB 1: CALORIE TRACKER -->
         <section id="tab-timer" class="space-y-4">
-            <!-- วันที่ น้ำหนักปัจจุบัน และเป้าหมายแคลอรี -->
             <div class="card-element border rounded-3xl p-5 art-shadow space-y-3">
                 <div class="flex items-center justify-between border-b border-slate-500/10 pb-3">
                     <div>
@@ -176,7 +173,6 @@
                     </div>
                 </div>
 
-                <!-- สรุปแคลอรีภาพรวม -->
                 <div class="grid grid-cols-3 gap-2 text-center pt-1">
                     <div class="input-element p-2.5 rounded-2xl border">
                         <span class="block text-[9px] text-slate-400 font-medium">ทานไปแล้ว</span>
@@ -235,7 +231,7 @@
                 </button>
             </div>
 
-            <!-- ของว่าง / ระหว่างวัน -->
+            <!-- ของว่าง -->
             <div class="card-element border rounded-3xl p-4 art-shadow space-y-3">
                 <div class="flex items-center justify-between">
                     <h3 class="text-xs font-bold flex items-center gap-1.5" style="color: var(--text-main);">
@@ -249,12 +245,11 @@
                 </button>
             </div>
 
-            <!-- ปุ่มบันทึกและปุ่มเคลียร์ข้อมูล (เชื่อมต่อ Google Sheets แล้ว) -->
             <div class="flex gap-2 pt-2">
                 <button onclick="clearDayLogs()" class="w-1/3 py-3 font-bold rounded-2xl text-xs border border-rose-500/30 text-rose-400 bg-rose-500/10 active:scale-95 transition">
                     <i class="fa-solid fa-trash-can mr-1"></i> เคลียร์วันนี้
                 </button>
-                <button onclick="saveFoodLogsToSheets()" class="w-2/3 py-3 font-bold rounded-2xl text-sm shadow-md active:scale-95 transition text-white" style="background-color: var(--accent);">
+                <button onclick="saveFoodLogsToLocal()" class="w-2/3 py-3 font-bold rounded-2xl text-sm shadow-md active:scale-95 transition text-white" style="background-color: var(--accent);">
                     <i class="fa-solid fa-floppy-disk mr-1.5"></i> บันทึกข้อมูลอาหารวันนี้
                 </button>
             </div>
@@ -382,7 +377,7 @@
         </button>
     </nav>
 
-    <!-- Modal เลือกธีมสีศิลป์ (Artistic Themes) -->
+    <!-- Modal Themes -->
     <div id="theme-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4 hidden">
         <div class="card-element border rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm space-y-4 art-shadow">
             <div class="flex items-center justify-between">
@@ -391,23 +386,23 @@
             </div>
             <div class="grid grid-cols-1 gap-2.5 text-xs">
                 <button onclick="applyTheme('default')" class="p-3 input-element border rounded-2xl flex items-center justify-between theme-dot">
-                    <span class="font-bold">🔮 Modern Indigo (ม่วงคลาสสิกโมเดิร์น)</span>
+                    <span class="font-bold">🔮 Modern Indigo</span>
                     <span class="w-5 h-5 rounded-full bg-indigo-500 shadow-sm"></span>
                 </button>
                 <button onclick="applyTheme('sunset')" class="p-3 input-element border rounded-2xl flex items-center justify-between theme-dot">
-                    <span class="font-bold">🌅 Rose Sunset (ชมพูพระอาทิตย์ตก)</span>
+                    <span class="font-bold">🌅 Rose Sunset</span>
                     <span class="w-5 h-5 rounded-full bg-rose-500 shadow-sm"></span>
                 </button>
                 <button onclick="applyTheme('emerald')" class="p-3 input-element border rounded-2xl flex items-center justify-between theme-dot">
-                    <span class="font-bold">💎 Rich Emerald (เขียวมรกตหรูหรา)</span>
+                    <span class="font-bold">💎 Rich Emerald</span>
                     <span class="w-5 h-5 rounded-full bg-emerald-600 shadow-sm"></span>
                 </button>
                 <button onclick="applyTheme('cyberpunk')" class="p-3 input-element border rounded-2xl flex items-center justify-between theme-dot">
-                    <span class="font-bold">⚡ Neon Orchid (นีออนกล้วยไม้)</span>
+                    <span class="font-bold">⚡ Neon Orchid</span>
                     <span class="w-5 h-5 rounded-full bg-fuchsia-500 shadow-sm"></span>
                 </button>
                 <button onclick="applyTheme('amber')" class="p-3 input-element border rounded-2xl flex items-center justify-between theme-dot">
-                    <span class="font-bold">🔥 Sunset Amber (ส้มแอมเบอร์อบอุ่น)</span>
+                    <span class="font-bold">🔥 Sunset Amber</span>
                     <span class="w-5 h-5 rounded-full bg-amber-500 shadow-sm"></span>
                 </button>
             </div>
@@ -438,8 +433,8 @@
 
         let weightChartInstance = null;
         let profileData = {}, weightLogs = [];
-        let calendarLogs = JSON.parse(localStorage.getItem('cal_art_calendar_logs')) || {};
-        let foodLogsData = JSON.parse(localStorage.getItem('cal_art_food_logs')) || {};
+        let calendarLogs = {};
+        let foodLogsData = {};
         let currentMonth = new Date().getMonth(), currentYear = new Date().getFullYear();
 
         window.onload = function() {
@@ -462,10 +457,8 @@
             const month = String(now.getMonth() + 1).padStart(2, '0');
             const day = String(now.getDate()).padStart(2, '0');
             document.getElementById('cal-log-date').value = `${year}-${month}-${day}`;
-            loadDailyFoodLogs();
         }
 
-        // --- DARK MODE TOGGLE ---
         function toggleDarkMode() {
             const htmlEl = document.documentElement;
             const darkIcon = document.getElementById('dark-icon');
@@ -481,7 +474,6 @@
             if (weightChartInstance) initOrUpdateChart();
         }
 
-        // --- THEME ENGINE ---
         function openThemeModal() { document.getElementById('theme-modal').classList.remove('hidden'); }
         function closeThemeModal() { document.getElementById('theme-modal').classList.add('hidden'); }
 
@@ -494,7 +486,6 @@
             closeThemeModal();
         }
 
-        // --- GOOGLE SHEETS API CALLS ---
         async function fetchDataFromSheets() {
             showLoading(true);
             try {
@@ -504,9 +495,16 @@
                 const resLogs = await fetch(`${GOOGLE_SCRIPT_URL}?action=getLogs`);
                 weightLogs = await resLogs.json();
 
+                const resFood = await fetch(`${GOOGLE_SCRIPT_URL}?action=getFoodLogs`);
+                foodLogsData = await resFood.json();
+
+                const resCal = await fetch(`${GOOGLE_SCRIPT_URL}?action=getCalendarLogs`);
+                calendarLogs = await resCal.json();
+
                 updateUIProfile();
                 calculateHealthMetrics();
                 initOrUpdateChart();
+                loadDailyFoodLogs();
                 renderCalendar();
             } catch (err) {
                 console.warn("Could not fetch cloud data, using defaults.");
@@ -556,7 +554,6 @@
             }
         }
 
-        // --- FOOD LOGIC & DYNAMIC TABLE ROWS ---
         function loadDailyFoodLogs() {
             const dateKey = document.getElementById('cal-log-date').value;
             const dayData = foodLogsData[dateKey] || { breakfast: [], lunch: [], dinner: [], snack: [] };
@@ -604,19 +601,25 @@
             calculateTotalCalories();
         }
 
-        function clearDayLogs() {
+        async function clearDayLogs() {
             if (!confirm("คุณต้องการล้างรายการอาหารทั้งหมดของวันนี้ใช่หรือไม่?")) return;
             const dateKey = document.getElementById('cal-log-date').value;
 
             delete foodLogsData[dateKey];
-            localStorage.setItem('cal_art_food_logs', JSON.stringify(foodLogsData));
-
             delete calendarLogs[dateKey];
-            localStorage.setItem('cal_art_calendar_logs', JSON.stringify(calendarLogs));
 
-            loadDailyFoodLogs();
-            renderCalendar();
-            alert("เคลียร์ข้อมูลของวันนี้เรียบร้อยแล้วครับ");
+            showLoading(true);
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "saveFoodLogs", date: dateKey, dayData: { breakfast: [], lunch: [], dinner: [], snack: [] } }) });
+                await fetch(GOOGLE_SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "saveCalendarLog", date: dateKey, status: "", note: "" }) });
+                loadDailyFoodLogs();
+                renderCalendar();
+                alert("เคลียร์ข้อมูลของวันนี้เรียบร้อยแล้วครับ");
+            } catch(e) {
+                alert("เกิดข้อผิดพลาดในการล้างข้อมูล");
+            } finally {
+                showLoading(false);
+            }
         }
 
         function calculateTotalCalories() {
@@ -654,9 +657,7 @@
             }
         }
 
-        // --- ฟังก์ชันบันทึกข้อมูลอาหารลง Google Sheets (อัปเดตใหม่) ---
-        async function saveFoodLogsToSheets() {
-            showLoading(true);
+        async function saveFoodLogsToLocal() {
             const dateKey = document.getElementById('cal-log-date').value;
             const dayData = { breakfast: [], lunch: [], dinner: [], snack: [] };
 
@@ -672,9 +673,7 @@
                 });
             });
 
-            // สำรองข้อมูลไว้ใน Local Storage ด้วย
             foodLogsData[dateKey] = dayData;
-            localStorage.setItem('cal_art_food_logs', JSON.stringify(foodLogsData));
 
             const targetCal = Number(document.getElementById('cal-target-val').innerText.replace(/,/g, '')) || 2000;
             const totalConsumed = Number(document.getElementById('total-consumed-cal').innerText.replace(/,/g, '')) || 0;
@@ -690,37 +689,26 @@
             }
 
             calendarLogs[dateKey] = { status, note };
-            localStorage.setItem('cal_art_calendar_logs', JSON.stringify(calendarLogs));
 
-            // ส่งข้อมูลยิงเข้า Google Apps Script
-            const payload = {
-                action: "saveFoodLog",
-                date: dateKey,
-                meals: dayData
-            };
-
+            showLoading(true);
             try {
-                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                await fetch(GOOGLE_SCRIPT_URL, {
                     method: "POST",
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({ action: "saveFoodLogs", date: dateKey, dayData: dayData })
                 });
-                const result = await response.json();
-                
-                if (result.status === "success") {
-                    alert("บันทึกรายการอาหารลง Google Sheets สำเร็จ!");
-                    renderCalendar();
-                } else {
-                    alert("บันทึกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
-                }
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: "saveCalendarLog", date: dateKey, status: status, note: note })
+                });
+                alert("บันทึกรายการอาหารและซิงค์ขึ้น Cloud เรียบร้อยแล้ว!");
+                renderCalendar();
             } catch (e) {
-                console.error(e);
-                alert("เกิดข้อผิดพลาดในการเชื่อมต่อกับ Google Sheets");
+                alert("เกิดข้อผิดพลาดในการบันทึกข้อมูลลง Cloud");
             } finally {
                 showLoading(false);
             }
         }
 
-        // --- HEALTH COMPUTATION ---
         function updateUIProfile() {
             document.getElementById('user-gender').value = profileData.gender || 'male';
             document.getElementById('user-age').value = profileData.age || 28;
@@ -816,7 +804,6 @@
             });
         }
 
-        // --- CALENDAR LOG FUNCTIONS ---
         function changeMonth(dir) {
             currentMonth += dir;
             if (currentMonth > 11) { currentMonth = 0; currentYear++; }
