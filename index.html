@@ -845,7 +845,35 @@
                 statusEl.innerText = 'เกินเป้าหมาย!';
                 statusEl.className = 'text-[11px] font-bold text-rose-400';
             }
+
+            // ให้สถานะในปฏิทินตรงกับข้อมูลอาหารที่แสดงอยู่ทันที
+            const dateEl = document.getElementById('cal-log-date');
+            if (dateEl && dateEl.value) {
+                syncCalendarStatusFromCurrentDay(dateEl.value, grandTotal, targetCal);
+            }
         }
+
+        function syncCalendarStatusFromCurrentDay(dateKey, totalConsumed, targetCal) {
+            let status = 'Success';
+            let note = `ทานไป ${totalConsumed} kcal`;
+
+            if (totalConsumed > targetCal + 300) {
+                status = 'Missed';
+                note = 'แคลอรีเกินเป้าหมายมาก';
+            } else if (totalConsumed > targetCal) {
+                status = 'Partial';
+                note = 'เกินเป้าเล็กน้อย';
+            }
+
+            calendarLogs[dateKey] = { status, note };
+            saveCache();
+
+            const calendarTab = document.getElementById('tab-calendar');
+            if (calendarTab && !calendarTab.classList.contains('hidden')) {
+                renderCalendar();
+            }
+        }
+
 
         async function saveFoodLogsToCloud() {
             const dateKey = document.getElementById('cal-log-date').value;
@@ -1149,13 +1177,42 @@
             const firstDay = new Date(currentYear, currentMonth, 1).getDay();
             const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
             const isDark = document.documentElement.classList.contains('dark');
+            const currentTargetCal = Number(document.getElementById('cal-target-val')?.innerText.replace(/,/g, '')) || 2000;
             let html = '';
 
             for (let i = 0; i < firstDay; i++) html += `<div class="aspect-square opacity-10"></div>`;
 
             for (let d = 1; d <= totalDays; d++) {
                 const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                const log = calendarLogs[dateKey];
+                let log = calendarLogs[dateKey];
+
+                // ถ้ามีรายการอาหารของวันนั้น ให้คำนวณสถานะใหม่จากข้อมูลจริง
+                // เพื่อไม่ให้ปฏิทินค้างสถานะเก่าจากตอนที่บันทึกครั้งก่อน
+                const dayData = foodLogsData[dateKey];
+                const hasFoodData = dayData && ['breakfast', 'lunch', 'dinner', 'snack']
+                    .some(meal => Array.isArray(dayData[meal]) && dayData[meal].length > 0);
+
+                if (hasFoodData) {
+                    let total = 0;
+                    ['breakfast', 'lunch', 'dinner', 'snack'].forEach(meal => {
+                        (Array.isArray(dayData[meal]) ? dayData[meal] : []).forEach(food => {
+                            total += Number(food?.cal) || 0;
+                        });
+                    });
+
+                    let status = 'Success';
+                    let note = `ทานไป ${total} kcal`;
+                    if (total > currentTargetCal + 300) {
+                        status = 'Missed';
+                        note = 'แคลอรีเกินเป้าหมายมาก';
+                    } else if (total > currentTargetCal) {
+                        status = 'Partial';
+                        note = 'เกินเป้าเล็กน้อย';
+                    }
+
+                    log = { status, note };
+                }
+
                 let bg = isDark ? 'input-element border text-slate-300' : 'bg-slate-100/70 border-slate-200 text-slate-700';
 
                 if (log) {
@@ -1171,6 +1228,7 @@
             }
             grid.innerHTML = html;
         }
+
 
         function jumpToDate(dateStr) {
             document.getElementById('cal-log-date').value = dateStr;
