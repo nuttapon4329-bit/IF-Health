@@ -927,53 +927,43 @@
         Number(document.getElementById('user-weight').value) || 70;
 
     // ใช้น้ำหนักจากวันที่ล่าสุดจริง
-    if (weightLogs && weightLogs.length > 0) {
-        const sortedLogs = [...weightLogs].sort(
-            (a, b) => new Date(b.date) - new Date(a.date)
-        );
+    if (Array.isArray(weightLogs) && weightLogs.length > 0) {
+        const sortedLogs = [...weightLogs]
+            .filter(log => log && log.date && Number(log.weight) > 0)
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        latestWeight =
-            Number(sortedLogs[0].weight) || latestWeight;
-    }
-
-    const currentWeightDisplay =
-        document.getElementById('current-weight-display');
-
-    if (currentWeightDisplay) {
-        currentWeightDisplay.innerText = latestWeight;
+        if (sortedLogs.length > 0) {
+            latestWeight = Number(sortedLogs[0].weight);
+        }
     }
 
     const lossRate =
         Number(document.getElementById('user-loss-rate').value) || 0.5;
 
-    const hM = height / 100;
+    /* =========================
+       BMI
+    ========================= */
 
-    const bmi =
-        latestWeight / (hM * hM);
+    const heightM = height / 100;
+    const bmi = latestWeight / (heightM * heightM);
 
-    const bmiVal =
-        document.getElementById('bmi-val');
-
-    if (bmiVal) {
-        bmiVal.innerText = bmi.toFixed(1);
-    }
+    const bmiVal = document.getElementById('bmi-val');
+    if (bmiVal) bmiVal.innerText = bmi.toFixed(1);
 
     let bmiText = "สมส่วน";
 
     if (bmi < 18.5) {
-        bmiText = "ผอมไป";
-    } else if (bmi >= 23 && bmi < 25) {
+        bmiText = "ผอม";
+    } else if (bmi < 23) {
+        bmiText = "สมส่วน";
+    } else if (bmi < 25) {
         bmiText = "ท้วม";
-    } else if (bmi >= 25) {
+    } else {
         bmiText = "อ้วน";
     }
 
-    const bmiStatus =
-        document.getElementById('bmi-status');
-
-    if (bmiStatus) {
-        bmiStatus.innerText = bmiText;
-    }
+    const bmiStatus = document.getElementById('bmi-status');
+    if (bmiStatus) bmiStatus.innerText = bmiText;
 
 
     /* =========================
@@ -985,28 +975,26 @@
         (6.25 * height) -
         (5 * age);
 
-    bmr =
-        gender === 'male'
-            ? bmr + 5
-            : bmr - 161;
+    if (gender === 'male') {
+        bmr += 5;
+    } else {
+        bmr -= 161;
+    }
 
 
     /* =========================
-       ACTIVITY FACTOR
+       ACTIVITY LEVEL
+
+       อ่านจาก profileData โดยตรง
+       เพื่อไม่ให้ค่ากิจกรรมค้างเป็น light
     ========================= */
 
-    // อ่านค่าจาก dropdown โดยตรง เพื่อให้เปลี่ยนระดับกิจกรรมแล้ว TDEE เปลี่ยนทันที
-    const activitySelect =
-        document.getElementById('user-activity');
-
     const activityLevel =
-        activitySelect && activitySelect.value
-            ? activitySelect.value
-            : ((typeof profileData !== 'undefined' &&
-                profileData &&
-                profileData.activityLevel)
-                ? profileData.activityLevel
-                : 'light');
+        (typeof profileData !== 'undefined' &&
+         profileData &&
+         profileData.activityLevel)
+            ? String(profileData.activityLevel)
+            : 'light';
 
     const activityFactors = {
         sedentary: 1.20,
@@ -1017,7 +1005,7 @@
     };
 
     const activityFactor =
-        activityFactors[activityLevel] || 1.375;
+        activityFactors[activityLevel] || 1.20;
 
 
     /* =========================
@@ -1027,17 +1015,13 @@
     const tdee =
         bmr * activityFactor;
 
-    const tdeeVal =
-        document.getElementById('tdee-val');
-
-    if (tdeeVal) {
-        tdeeVal.innerText =
-            Math.round(tdee).toLocaleString();
-    }
-
 
     /* =========================
-       CALORIE DEFICIT
+       WEIGHT LOSS DEFICIT
+
+       0.5 kg/week
+       = 0.5 × 7700 ÷ 7
+       = 550 kcal/day
     ========================= */
 
     const dailyDeficit =
@@ -1050,7 +1034,6 @@
     /* =========================
        MINIMUM CALORIE FLOOR
 
-       ไม่ใช้ BMR เป็นขั้นต่ำ
        ชาย   = 1,500 kcal
        หญิง = 1,200 kcal
     ========================= */
@@ -1060,14 +1043,21 @@
             ? 1500
             : 1200;
 
-    if (targetCal < minSafetyCal) {
-        targetCal = minSafetyCal;
-    }
+    targetCal =
+        Math.max(targetCal, minSafetyCal);
 
 
     /* =========================
-       DISPLAY
+       UPDATE DISPLAY
     ========================= */
+
+    const tdeeVal =
+        document.getElementById('tdee-val');
+
+    if (tdeeVal) {
+        tdeeVal.innerText =
+            Math.round(tdee).toLocaleString();
+    }
 
     const targetVal =
         document.getElementById('cal-target-val');
@@ -1075,14 +1065,6 @@
     if (targetVal) {
         targetVal.innerText =
             targetCal.toLocaleString();
-    }
-
-    const targetDisplay =
-        document.getElementById('target-cal-display');
-
-    if (targetDisplay) {
-        targetDisplay.innerText =
-            targetCal.toLocaleString() + ' kcal';
     }
 
     const minVal =
@@ -1093,8 +1075,14 @@
             minSafetyCal.toLocaleString();
     }
 
+    const targetDisplay =
+        document.getElementById('target-cal-display');
 
-    // อัปเดตข้อมูลสำหรับส่วนอื่นของหน้า
+    if (targetDisplay) {
+        targetDisplay.innerText =
+            targetCal.toLocaleString() + ' kcal';
+    }
+
     if (typeof calculateTotalCalories === 'function') {
         calculateTotalCalories();
     }
