@@ -697,9 +697,9 @@
             const existingIndex = weightLogs.findIndex(x => normalizeDate(x.date) === date);
             if (existingIndex >= 0) weightLogs[existingIndex].weight = weight;
             else weightLogs.push({ date, weight });
-            profileData.weight = weight;
+            // ห้ามเขียนทับ profileData.weight
+            // เพราะ profileData.weight คือ "น้ำหนักเริ่มต้น"
             saveCache();
-            updateUIProfile();
             calculateHealthMetrics();
             initOrUpdateChart();
 
@@ -946,23 +946,40 @@
             else htmlEl.setAttribute('data-theme', themeName);
         }
 
+        // น้ำหนักอ้างอิง = น้ำหนักที่ชั่งล่าสุดจาก WeightLogs
+        // ไม่แก้ไขน้ำหนักเริ่มต้นใน Profile
+        function getLatestReferenceWeight() {
+            const startingWeight =
+                Number(document.getElementById('user-weight').value) || 70;
+
+            if (!Array.isArray(weightLogs) || weightLogs.length === 0) {
+                return startingWeight;
+            }
+
+            const sortedLogs = [...weightLogs]
+                .filter(log => log && log.date && Number(log.weight) > 0)
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            return sortedLogs.length > 0
+                ? Number(sortedLogs[0].weight)
+                : startingWeight;
+        }
+
         function calculateHealthMetrics() {
     const gender = document.getElementById('user-gender').value;
     const age = Number(document.getElementById('user-age').value) || 28;
     const height = Number(document.getElementById('user-height').value) || 170;
 
-    let latestWeight =
-        Number(document.getElementById('user-weight').value) || 70;
+    // ใช้น้ำหนักอ้างอิงจากน้ำหนักที่ชั่งล่าสุด
+    // ส่วน "น้ำหนักเริ่มต้น" จะไม่ถูกนำมาเปลี่ยนตาม Weight Log
+    const latestWeight = getLatestReferenceWeight();
 
-    // ใช้น้ำหนักจากวันที่ล่าสุดจริง
-    if (Array.isArray(weightLogs) && weightLogs.length > 0) {
-        const sortedLogs = [...weightLogs]
-            .filter(log => log && log.date && Number(log.weight) > 0)
-            .sort((a, b) => new Date(b.date) - new Date(a.date));
+    const currentWeightDisplay =
+        document.getElementById('current-weight-display');
 
-        if (sortedLogs.length > 0) {
-            latestWeight = Number(sortedLogs[0].weight);
-        }
+    if (currentWeightDisplay) {
+        currentWeightDisplay.innerText =
+            latestWeight.toFixed(1).replace(/\.0$/, '');
     }
 
     const lossRate =
@@ -1251,7 +1268,7 @@
         function openWeightModal() {
             const now = new Date();
             document.getElementById('log-date').value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-            document.getElementById('log-weight-val').value = profileData.weight || 70;
+            document.getElementById('log-weight-val').value = getLatestReferenceWeight();
             document.getElementById('weight-modal').classList.remove('hidden');
         }
 
