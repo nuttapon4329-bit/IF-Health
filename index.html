@@ -289,7 +289,7 @@
                     </div>
                     <div>
                         <label class="text-slate-400 text-[10px] font-semibold">ระดับกิจกรรม</label>
-                        <select id="user-activity" onchange="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2 font-medium">
+                        <select id="user-activity" onchange="handleActivityChange()" class="w-full input-element border rounded-xl p-2 font-medium">
                             <option value="sedentary">นั่งเป็นส่วนใหญ่ (ไม่ออกกำลัง)</option>
                             <option value="light" selected>ออกกำลังเบา 1–3 วัน/สัปดาห์</option>
                             <option value="moderate">ออกกำลังปานกลาง 3–5 วัน/สัปดาห์</option>
@@ -1029,17 +1029,11 @@
 
     /* =========================
        ACTIVITY LEVEL
-
-       อ่านจาก profileData โดยตรง
-       เพื่อไม่ให้ค่ากิจกรรมค้างเป็น light
+       อ่านค่าปัจจุบันจาก dropdown ทุกครั้งที่คำนวณ
     ========================= */
 
     const activityLevel =
-        (typeof profileData !== 'undefined' &&
-         profileData &&
-         profileData.activityLevel)
-            ? String(profileData.activityLevel)
-            : 'light';
+        document.getElementById('user-activity').value || 'light';
 
     const activityFactors = {
         sedentary: 1.20,
@@ -1132,6 +1126,15 @@
         calculateTotalCalories();
     }
 }
+
+        // เมื่อเปลี่ยนระดับกิจกรรม ให้คำนวณใหม่ทันทีและบันทึกค่าที่เลือก
+        async function handleActivityChange() {
+            profileData.activityLevel = document.getElementById('user-activity').value || 'light';
+            calculateHealthMetrics();
+            saveCache();
+            // ซิงค์ค่าระดับกิจกรรมไว้ใช้ครั้งถัดไปด้วย
+            await saveSettingsToCloud();
+        }
 
         function initOrUpdateChart() {
             const canvas = document.getElementById('weightChart');
