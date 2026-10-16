@@ -330,9 +330,9 @@
                     <span class="text-[9px] text-slate-400 font-medium">kcal (เพื่อลดน้ำหนัก)</span>
                 </div>
                 <div class="card-element border p-3 rounded-2xl art-shadow">
-                    <span class="text-[10px] text-slate-400 font-semibold">ทานขั้นต่ำสุด/วัน</span>
+                    <span class="text-[10px] text-slate-400 font-semibold">ทานขั้นต่ำสุด/วัน (BMR)</span>
                     <h3 id="cal-min-val" class="text-lg font-bold text-rose-400 mt-0.5">--</h3>
-                    <span class="text-[9px] text-rose-400 font-medium">ห้ามต่ำกว่านี้</span>
+                    <span class="text-[9px] text-rose-400 font-medium">ห้ามต่ำกว่า BMR</span>
                 </div>
             </div>
 
@@ -995,7 +995,7 @@
             if (bmiStatus) bmiStatus.innerText = bmiText;
 
             /* =========================
-               BMR Selection:
+               BMR Calculation
                - หากกรอก % ไขมัน ใช้ Katch-McArdle (LBM)
                - หากไม่กรอก ใช้ Mifflin-St Jeor ตามเดิม
             ========================= */
@@ -1011,7 +1011,7 @@
             }
 
             /* =========================
-               ACTIVITY LEVEL
+               ACTIVITY LEVEL & TDEE
             ========================= */
             const activityLevel = document.getElementById('user-activity').value || 'light';
             const activityFactors = {
@@ -1022,22 +1022,18 @@
                 extraActive: 1.90
             };
             const activityFactor = activityFactors[activityLevel] || 1.20;
-
-            /* =========================
-               TDEE
-            ========================= */
             const tdee = bmr * activityFactor;
 
             /* =========================
-               WEIGHT LOSS DEFICIT
+               WEIGHT LOSS DEFICIT & TARGET
             ========================= */
             const dailyDeficit = (lossRate * 7700) / 7;
             let targetCal = Math.round(tdee - dailyDeficit);
 
             /* =========================
-               MINIMUM CALORIE FLOOR
+               MINIMUM CALORIE FLOOR (ใช้ BMR เป็นเกณฑ์ขั้นต่ำ)
             ========================= */
-            const minSafetyCal = gender === 'male' ? 1500 : 1200;
+            const minSafetyCal = Math.round(bmr);
             targetCal = Math.max(targetCal, minSafetyCal);
 
             /* =========================
@@ -1192,7 +1188,7 @@
             });
             document.getElementById(`tab-${t}`).classList.remove('hidden');
             document.getElementById(`nav-${t}`).style.color = 'var(--accent)';
-            document.getElementById(`nav-%s`?.replace('%s', t) || `nav-${t}`).querySelector('span').className = 'text-[10px] font-bold';
+            document.getElementById(`nav-${t}`).querySelector('span').className = 'text-[10px] font-bold';
             if (t === 'calendar') renderCalendar();
         }
 
