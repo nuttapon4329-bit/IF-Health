@@ -284,10 +284,14 @@
                         <input type="number" step="0.1" id="user-weight" value="70" oninput="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2 font-medium">
                     </div>
                     <div>
+                        <label class="text-slate-400 text-[10px] font-semibold">เปอร์เซ็นต์ไขมัน (% Body Fat)</label>
+                        <input type="number" step="0.1" id="user-body-fat" placeholder="ไม่บังคับ (คำนวณ LBM)" oninput="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2 font-medium">
+                    </div>
+                    <div>
                         <label class="text-slate-400 text-[10px] font-semibold">น้ำหนักเป้าหมาย (กก.)</label>
                         <input type="number" step="0.1" id="user-target" value="62" oninput="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2 font-medium">
                     </div>
-                    <div>
+                    <div class="col-span-2">
                         <label class="text-slate-400 text-[10px] font-semibold">ระดับกิจกรรม</label>
                         <select id="user-activity" onchange="handleActivityChange()" class="w-full input-element border rounded-xl p-2 font-medium">
                             <option value="sedentary">นั่งเป็นส่วนใหญ่ (ไม่ออกกำลัง)</option>
@@ -297,7 +301,7 @@
                             <option value="extraActive">ออกกำลังหนักมาก / งานใช้แรง</option>
                         </select>
                     </div>
-                    <div>
+                    <div class="col-span-2">
                         <label class="text-slate-400 text-[10px] font-semibold">เป้าลด/สัปดาห์</label>
                         <select id="user-loss-rate" onchange="calculateHealthMetrics()" class="w-full input-element border rounded-xl p-2 font-bold" style="color: var(--accent);">
                             <option value="0.25">0.25 กก. (ชิวๆ)</option>
@@ -441,7 +445,7 @@
 
     <script>
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzY38zVJlc70UqiMKc1Ao8Nt6KmOcc06vMCIlRFWgKz4uHpnPAjul7s0PAITVg9XO7Zcw/exec";
-        const CACHE_KEY = "calHealthArtCache_v2";
+        const CACHE_KEY = "calHealthArtCache_v3";
         const CACHE_MAX_AGE = 1000 * 60 * 60 * 24 * 7;
         const REQUEST_TIMEOUT = 12000;
 
@@ -480,7 +484,7 @@
         }
 
         function getDefaultProfile() {
-            return { gender: "male", age: 28, height: 170, weight: 70, targetWeight: 62, activityLevel: "light", theme: "default", darkMode: false };
+            return { gender: "male", age: 28, height: 170, weight: 70, bodyFat: "", targetWeight: 62, activityLevel: "light", theme: "default", darkMode: false };
         }
 
         function loadCache() {
@@ -643,6 +647,7 @@
                 age: profileData.age || Number(document.getElementById('user-age').value),
                 height: profileData.height || Number(document.getElementById('user-height').value),
                 weight: profileData.weight || Number(document.getElementById('user-weight').value),
+                bodyFat: document.getElementById('user-body-fat').value,
                 targetWeight: profileData.targetWeight || Number(document.getElementById('user-target').value),
                 activityLevel: profileData.activityLevel || document.getElementById('user-activity').value || 'light',
                 theme: profileData.theme || 'default',
@@ -668,6 +673,7 @@
             profileData.age = Number(document.getElementById('user-age').value);
             profileData.height = Number(document.getElementById('user-height').value);
             profileData.weight = Number(document.getElementById('user-weight').value);
+            profileData.bodyFat = document.getElementById('user-body-fat').value;
             profileData.targetWeight = Number(document.getElementById('user-target').value);
             profileData.activityLevel = document.getElementById('user-activity').value;
 
@@ -693,12 +699,10 @@
 
             closeWeightModal();
 
-            // อัปเดตหน้าจอทันที ไม่รอ Cloud
             const existingIndex = weightLogs.findIndex(x => normalizeDate(x.date) === date);
             if (existingIndex >= 0) weightLogs[existingIndex].weight = weight;
             else weightLogs.push({ date, weight });
-            // ห้ามเขียนทับ profileData.weight
-            // เพราะ profileData.weight คือ "น้ำหนักเริ่มต้น"
+            
             saveCache();
             calculateHealthMetrics();
             initOrUpdateChart();
@@ -846,7 +850,6 @@
                 statusEl.className = 'text-[11px] font-bold text-rose-400';
             }
 
-            // ให้สถานะในปฏิทินตรงกับข้อมูลอาหารที่แสดงอยู่ทันที
             const dateEl = document.getElementById('cal-log-date');
             if (dateEl && dateEl.value) {
                 syncCalendarStatusFromCurrentDay(dateEl.value, grandTotal, targetCal);
@@ -874,7 +877,6 @@
             }
         }
 
-
         async function saveFoodLogsToCloud() {
             const dateKey = document.getElementById('cal-log-date').value;
             const dayData = { breakfast: [], lunch: [], dinner: [], snack: [] };
@@ -900,7 +902,6 @@
                 note = 'เกินเป้าเล็กน้อย';
             }
 
-            // แสดงผลทันที + cache ก่อน
             foodLogsData[dateKey] = dayData;
             calendarLogs[dateKey] = { status, note };
             saveCache();
@@ -927,6 +928,7 @@
             document.getElementById('user-age').value = profileData.age || 28;
             document.getElementById('user-height').value = profileData.height || 170;
             document.getElementById('user-weight').value = profileData.weight || 70;
+            document.getElementById('user-body-fat').value = profileData.bodyFat !== undefined ? profileData.bodyFat : '';
             document.getElementById('user-target').value = profileData.targetWeight || 62;
             document.getElementById('user-activity').value = profileData.activityLevel || 'light';
         }
@@ -946,11 +948,8 @@
             else htmlEl.setAttribute('data-theme', themeName);
         }
 
-        // น้ำหนักอ้างอิง = น้ำหนักที่ชั่งล่าสุดจาก WeightLogs
-        // ไม่แก้ไขน้ำหนักเริ่มต้นใน Profile
         function getLatestReferenceWeight() {
-            const startingWeight =
-                Number(document.getElementById('user-weight').value) || 70;
+            const startingWeight = Number(document.getElementById('user-weight').value) || 70;
 
             if (!Array.isArray(weightLogs) || weightLogs.length === 0) {
                 return startingWeight;
@@ -960,179 +959,111 @@
                 .filter(log => log && log.date && Number(log.weight) > 0)
                 .sort((a, b) => new Date(b.date) - new Date(a.date));
 
-            return sortedLogs.length > 0
-                ? Number(sortedLogs[0].weight)
-                : startingWeight;
+            return sortedLogs.length > 0 ? Number(sortedLogs[0].weight) : startingWeight;
         }
 
         function calculateHealthMetrics() {
-    const gender = document.getElementById('user-gender').value;
-    const age = Number(document.getElementById('user-age').value) || 28;
-    const height = Number(document.getElementById('user-height').value) || 170;
+            const gender = document.getElementById('user-gender').value;
+            const age = Number(document.getElementById('user-age').value) || 28;
+            const height = Number(document.getElementById('user-height').value) || 170;
+            const latestWeight = getLatestReferenceWeight();
+            const bodyFatInput = document.getElementById('user-body-fat').value;
 
-    // ใช้น้ำหนักอ้างอิงจากน้ำหนักที่ชั่งล่าสุด
-    // ส่วน "น้ำหนักเริ่มต้น" จะไม่ถูกนำมาเปลี่ยนตาม Weight Log
-    const latestWeight = getLatestReferenceWeight();
+            const currentWeightDisplay = document.getElementById('current-weight-display');
+            if (currentWeightDisplay) {
+                currentWeightDisplay.innerText = latestWeight.toFixed(1).replace(/\.0$/, '');
+            }
 
-    const currentWeightDisplay =
-        document.getElementById('current-weight-display');
+            const lossRate = Number(document.getElementById('user-loss-rate').value) || 0.5;
 
-    if (currentWeightDisplay) {
-        currentWeightDisplay.innerText =
-            latestWeight.toFixed(1).replace(/\.0$/, '');
-    }
+            /* =========================
+               BMI
+            ========================= */
+            const heightM = height / 100;
+            const bmi = latestWeight / (heightM * heightM);
 
-    const lossRate =
-        Number(document.getElementById('user-loss-rate').value) || 0.5;
+            const bmiVal = document.getElementById('bmi-val');
+            if (bmiVal) bmiVal.innerText = bmi.toFixed(1);
 
-    /* =========================
-       BMI
-    ========================= */
+            let bmiText = "สมส่วน";
+            if (bmi < 18.5) bmiText = "ผอม";
+            else if (bmi < 23) bmiText = "สมส่วน";
+            else if (bmi < 25) bmiText = "ท้วม";
+            else bmiText = "อ้วน";
 
-    const heightM = height / 100;
-    const bmi = latestWeight / (heightM * heightM);
+            const bmiStatus = document.getElementById('bmi-status');
+            if (bmiStatus) bmiStatus.innerText = bmiText;
 
-    const bmiVal = document.getElementById('bmi-val');
-    if (bmiVal) bmiVal.innerText = bmi.toFixed(1);
+            /* =========================
+               BMR Selection:
+               - หากกรอก % ไขมัน ใช้ Katch-McArdle (LBM)
+               - หากไม่กรอก ใช้ Mifflin-St Jeor ตามเดิม
+            ========================= */
+            let bmr = 0;
+            if (bodyFatInput !== "" && !isNaN(Number(bodyFatInput))) {
+                const bf = Number(bodyFatInput);
+                const lbm = latestWeight * (1 - (bf / 100)); // คำนวณ Lean Body Mass
+                bmr = 370 + (21.6 * lbm); // สูตร Katch-McArdle
+            } else {
+                bmr = (10 * latestWeight) + (6.25 * height) - (5 * age);
+                if (gender === 'male') bmr += 5;
+                else bmr -= 161;
+            }
 
-    let bmiText = "สมส่วน";
+            /* =========================
+               ACTIVITY LEVEL
+            ========================= */
+            const activityLevel = document.getElementById('user-activity').value || 'light';
+            const activityFactors = {
+                sedentary: 1.20,
+                light: 1.375,
+                moderate: 1.55,
+                veryActive: 1.725,
+                extraActive: 1.90
+            };
+            const activityFactor = activityFactors[activityLevel] || 1.20;
 
-    if (bmi < 18.5) {
-        bmiText = "ผอม";
-    } else if (bmi < 23) {
-        bmiText = "สมส่วน";
-    } else if (bmi < 25) {
-        bmiText = "ท้วม";
-    } else {
-        bmiText = "อ้วน";
-    }
+            /* =========================
+               TDEE
+            ========================= */
+            const tdee = bmr * activityFactor;
 
-    const bmiStatus = document.getElementById('bmi-status');
-    if (bmiStatus) bmiStatus.innerText = bmiText;
+            /* =========================
+               WEIGHT LOSS DEFICIT
+            ========================= */
+            const dailyDeficit = (lossRate * 7700) / 7;
+            let targetCal = Math.round(tdee - dailyDeficit);
 
+            /* =========================
+               MINIMUM CALORIE FLOOR
+            ========================= */
+            const minSafetyCal = gender === 'male' ? 1500 : 1200;
+            targetCal = Math.max(targetCal, minSafetyCal);
 
-    /* =========================
-       BMR : Mifflin-St Jeor
-    ========================= */
+            /* =========================
+               UPDATE DISPLAY
+            ========================= */
+            const tdeeVal = document.getElementById('tdee-val');
+            if (tdeeVal) tdeeVal.innerText = Math.round(tdee).toLocaleString();
 
-    let bmr =
-        (10 * latestWeight) +
-        (6.25 * height) -
-        (5 * age);
+            const targetVal = document.getElementById('cal-target-val');
+            if (targetVal) targetVal.innerText = targetCal.toLocaleString();
 
-    if (gender === 'male') {
-        bmr += 5;
-    } else {
-        bmr -= 161;
-    }
+            const minVal = document.getElementById('cal-min-val');
+            if (minVal) minVal.innerText = minSafetyCal.toLocaleString();
 
+            const targetDisplay = document.getElementById('target-cal-display');
+            if (targetDisplay) targetDisplay.innerText = targetCal.toLocaleString() + ' kcal';
 
-    /* =========================
-       ACTIVITY LEVEL
-       อ่านค่าปัจจุบันจาก dropdown ทุกครั้งที่คำนวณ
-    ========================= */
+            if (typeof calculateTotalCalories === 'function') {
+                calculateTotalCalories();
+            }
+        }
 
-    const activityLevel =
-        document.getElementById('user-activity').value || 'light';
-
-    const activityFactors = {
-        sedentary: 1.20,
-        light: 1.375,
-        moderate: 1.55,
-        veryActive: 1.725,
-        extraActive: 1.90
-    };
-
-    const activityFactor =
-        activityFactors[activityLevel] || 1.20;
-
-
-    /* =========================
-       TDEE
-    ========================= */
-
-    const tdee =
-        bmr * activityFactor;
-
-
-    /* =========================
-       WEIGHT LOSS DEFICIT
-
-       0.5 kg/week
-       = 0.5 × 7700 ÷ 7
-       = 550 kcal/day
-    ========================= */
-
-    const dailyDeficit =
-        (lossRate * 7700) / 7;
-
-    let targetCal =
-        Math.round(tdee - dailyDeficit);
-
-
-    /* =========================
-       MINIMUM CALORIE FLOOR
-
-       ชาย   = 1,500 kcal
-       หญิง = 1,200 kcal
-    ========================= */
-
-    const minSafetyCal =
-        gender === 'male'
-            ? 1500
-            : 1200;
-
-    targetCal =
-        Math.max(targetCal, minSafetyCal);
-
-
-    /* =========================
-       UPDATE DISPLAY
-    ========================= */
-
-    const tdeeVal =
-        document.getElementById('tdee-val');
-
-    if (tdeeVal) {
-        tdeeVal.innerText =
-            Math.round(tdee).toLocaleString();
-    }
-
-    const targetVal =
-        document.getElementById('cal-target-val');
-
-    if (targetVal) {
-        targetVal.innerText =
-            targetCal.toLocaleString();
-    }
-
-    const minVal =
-        document.getElementById('cal-min-val');
-
-    if (minVal) {
-        minVal.innerText =
-            minSafetyCal.toLocaleString();
-    }
-
-    const targetDisplay =
-        document.getElementById('target-cal-display');
-
-    if (targetDisplay) {
-        targetDisplay.innerText =
-            targetCal.toLocaleString() + ' kcal';
-    }
-
-    if (typeof calculateTotalCalories === 'function') {
-        calculateTotalCalories();
-    }
-}
-
-        // เมื่อเปลี่ยนระดับกิจกรรม ให้คำนวณใหม่ทันทีและบันทึกค่าที่เลือก
         async function handleActivityChange() {
             profileData.activityLevel = document.getElementById('user-activity').value || 'light';
             calculateHealthMetrics();
             saveCache();
-            // ซิงค์ค่าระดับกิจกรรมไว้ใช้ครั้งถัดไปด้วย
             await saveSettingsToCloud();
         }
 
@@ -1206,8 +1137,6 @@
                 const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                 let log = calendarLogs[dateKey];
 
-                // ถ้ามีรายการอาหารของวันนั้น ให้คำนวณสถานะใหม่จากข้อมูลจริง
-                // เพื่อไม่ให้ปฏิทินค้างสถานะเก่าจากตอนที่บันทึกครั้งก่อน
                 const dayData = foodLogsData[dateKey];
                 const hasFoodData = dayData && ['breakfast', 'lunch', 'dinner', 'snack']
                     .some(meal => Array.isArray(dayData[meal]) && dayData[meal].length > 0);
@@ -1249,7 +1178,6 @@
             grid.innerHTML = html;
         }
 
-
         function jumpToDate(dateStr) {
             document.getElementById('cal-log-date').value = dateStr;
             loadDailyFoodLogs();
@@ -1264,7 +1192,7 @@
             });
             document.getElementById(`tab-${t}`).classList.remove('hidden');
             document.getElementById(`nav-${t}`).style.color = 'var(--accent)';
-            document.getElementById(`nav-${t}`).querySelector('span').className = 'text-[10px] font-bold';
+            document.getElementById(`nav-%s`?.replace('%s', t) || `nav-${t}`).querySelector('span').className = 'text-[10px] font-bold';
             if (t === 'calendar') renderCalendar();
         }
 
